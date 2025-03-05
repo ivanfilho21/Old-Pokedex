@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrains.kotlin.serializable)
+    alias(libs.plugins.google.devtools.ksp)
 }
 
 android {
@@ -60,6 +61,10 @@ dependencies {
 
     // Serialization
     implementation(libs.jetbrains.serializable.json)
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
 
     // Other libs
     implementation(libs.androidx.core.ktx)

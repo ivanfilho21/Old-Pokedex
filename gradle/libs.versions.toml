@@ -12,6 +12,8 @@ activityCompose = "1.8.0"
 constraintLayout = "1.1.0"
 navVersion = "2.8.8"
 serializable = "1.6.0"
+room = "2.6.1"
+ksp = "1.9.0-1.0.13"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -29,9 +31,12 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 jetbrains-serializable-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serializable" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintLayout" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 jetbrains-kotlin-serializable = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serializable" }
+google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
