@@ -11,7 +11,7 @@ interface PokemonDao {
     fun getAll(): List<PokemonEntity>
 
     @Query("SELECT * FROM pokemon WHERE name LIKE :name")
-    fun searchByName(name: String)
+    fun searchByName(name: String): List<PokemonEntity>
 
     @Insert
     fun insertAll(vararg pokemon: PokemonEntity)

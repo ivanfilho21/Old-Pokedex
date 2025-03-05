@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import br.iwan.oldpokedex.data.local.dao.PokemonDao
 import br.iwan.oldpokedex.data.local.entity.PokemonEntity
 
-@Database(entities = [PokemonEntity::class], version = 1)
+@Database(entities = [PokemonEntity::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     companion object {
         lateinit var instance: AppDatabase
