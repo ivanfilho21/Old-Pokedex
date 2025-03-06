@@ -2,6 +2,7 @@ package br.iwan.oldpokedex.ui
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -9,7 +10,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,17 +19,20 @@ import br.iwan.oldpokedex.ui.navigation.HomeScreen
 import br.iwan.oldpokedex.ui.theme.PokeDexTheme
 import br.iwan.oldpokedex.ui.theme.backgroundColor
 import br.iwan.oldpokedex.ui.view_model.HomeViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavHostController
-    private lateinit var homeVM: HomeViewModel
+    private val homeVM by viewModels<HomeViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             navController = rememberNavController()
-            homeVM = viewModel()
+
+            homeVM.listAllPokemon()
 
             PokeDexTheme {
                 ScreenContent()
@@ -41,8 +44,6 @@ class MainActivity : AppCompatActivity() {
     @Composable
     private fun Preview() {
         navController = rememberNavController()
-
-        homeVM = viewModel()
 
         PokeDexTheme {
             ScreenContent()
