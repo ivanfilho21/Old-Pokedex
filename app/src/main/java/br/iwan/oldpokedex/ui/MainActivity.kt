@@ -12,9 +12,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
-import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -40,14 +37,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            navController = rememberNavController().apply {
-                addOnDestinationChangedListener { controller, destination, _ ->
-
-                    when (controller.currentDestination?.label) {
-                        PokemonDetailsScreen.toString() -> {}
-                    }
-                }
-            }
+            navController = rememberNavController()
 
             homeVM.listAllPokemon()
 

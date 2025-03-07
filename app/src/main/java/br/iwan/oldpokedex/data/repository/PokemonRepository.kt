@@ -4,7 +4,6 @@ import br.iwan.oldpokedex.data.local.dao.PokemonDao
 import br.iwan.oldpokedex.data.local.entity.PokemonEntity
 import br.iwan.oldpokedex.data.remote.PokemonService
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
