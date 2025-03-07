@@ -10,17 +10,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,7 +33,6 @@ import br.iwan.oldpokedex.data.local.entity.PokemonEntity
 import br.iwan.oldpokedex.ui.theme.backgroundColor
 import br.iwan.oldpokedex.ui.view_model.HomeViewModel
 import kotlinx.coroutines.delay
-import kotlin.random.Random
 
 @Preview
 @Composable
@@ -63,29 +61,30 @@ private fun Preview() {
                         PokemonEntity(i + 1, it, "")
                     }
                 )
-            }
+            },
+            onPokemonClick = {}
         )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenContent(viewModel: HomeViewModel) {
+fun HomeScreenContent(viewModel: HomeViewModel, onPokemonClick: (String) -> Unit) {
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (searchBarRef, listRef) = createRefs()
 
-        val suggestions = remember {
-            mutableStateListOf<String>()
-        }
         // Barra de pesquisa para filtrar por nome
 
         LaunchedEffect(viewModel.searchBarQuery) {
             if (viewModel.searchBarQuery.isBlank()) return@LaunchedEffect
 
+            viewModel.clearSuggestions()
+
             delay(1000)
 
-            if (suggestions.size < 3)
-                suggestions.add("Pokémon " + Random.nextInt(152))
+            if (viewModel.searchBarQuery.length >= 3) {
+                viewModel.searchByName()
+            }
         }
 
         var suggestionItemsEnabled by remember {
@@ -100,16 +99,26 @@ fun HomeScreenContent(viewModel: HomeViewModel) {
             suggestionItemsEnabled = true
         }
 
-        SearchBar(
+        val suggestions by viewModel.suggestionsSF.collectAsState()
+
+        LaunchedEffect(suggestions) {
+            viewModel.searchBarExpanded = suggestions.isNotEmpty()
+        }
+
+        DockedSearchBar(
             inputField = {
                 SearchBarDefaults.InputField(
                     query = viewModel.searchBarQuery,
                     onQueryChange = { query ->
-                        viewModel.searchBarQuery = query
+                        if (viewModel.searchBarQuery != query) {
+                            viewModel.searchBarQuery = query
+                        }
                     },
-                    onSearch = { viewModel.searchBarExpanded = false },
+                    onSearch = { text ->
+                        viewModel.onSearchBarAction(text, onPokemonClick)
+                    },
                     expanded = viewModel.searchBarExpanded,
-                    onExpandedChange = { viewModel.searchBarExpanded = it },
+                    onExpandedChange = { _ -> },
                     placeholder = { Text("Digite o nome") },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     trailingIcon = {
@@ -119,7 +128,7 @@ fun HomeScreenContent(viewModel: HomeViewModel) {
                             modifier = Modifier.clickable(
                                 enabled = suggestionItemsEnabled,
                                 onClick = {
-                                    //
+                                    // mostrar opções
                                 }
                             )
                         )
@@ -127,13 +136,7 @@ fun HomeScreenContent(viewModel: HomeViewModel) {
                 )
             },
             expanded = viewModel.searchBarExpanded,
-            onExpandedChange = { expanded ->
-                if (expanded) {
-                    viewModel.searchBarQuery = ""
-                    suggestions.clear()
-                }
-                viewModel.searchBarExpanded = expanded
-            },
+            onExpandedChange = { _ -> },
             modifier = Modifier.constrainAs(searchBarRef) {
                 top.linkTo(parent.top)
                 start.linkTo(parent.start)
@@ -141,8 +144,6 @@ fun HomeScreenContent(viewModel: HomeViewModel) {
                 width = Dimension.fillToConstraints
             }
         ) {
-            // Ir adicionando numa lista e depois mostrar no LazyColumn
-
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 items(items = suggestions) { item ->
                     ListItem(
@@ -152,7 +153,7 @@ fun HomeScreenContent(viewModel: HomeViewModel) {
                         modifier = Modifier.clickable(
                             enabled = suggestionItemsEnabled,
                             onClick = {
-                                // same action as searching
+                                viewModel.onSearchBarAction(item, onPokemonClick)
                             }
                         )
                     )
@@ -186,7 +187,7 @@ fun HomeScreenContent(viewModel: HomeViewModel) {
                     modifier = Modifier.clickable(
                         enabled = suggestionItemsEnabled,
                         onClick = {
-                            // open details screen
+                            onPokemonClick(item.name.orEmpty())
                         }
                     )
                 )
