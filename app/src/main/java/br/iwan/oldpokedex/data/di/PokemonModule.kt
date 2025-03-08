@@ -1,4 +1,4 @@
-package br.iwan.oldpokedex.data.repository
+package br.iwan.oldpokedex.data.di
 
 import br.iwan.oldpokedex.data.local.AppDatabase
 import br.iwan.oldpokedex.data.local.dao.PokemonDao
