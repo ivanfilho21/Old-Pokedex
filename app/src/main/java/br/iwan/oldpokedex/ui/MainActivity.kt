@@ -12,6 +12,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -23,14 +25,19 @@ import br.iwan.oldpokedex.ui.navigation.HomeScreen
 import br.iwan.oldpokedex.ui.navigation.PokemonDetailsScreen
 import br.iwan.oldpokedex.ui.theme.PokeDexTheme
 import br.iwan.oldpokedex.ui.theme.backgroundColor
+import br.iwan.oldpokedex.ui.view_model.DetailsLayoutViewModel
 import br.iwan.oldpokedex.ui.view_model.DetailsViewModel
+import br.iwan.oldpokedex.ui.view_model.HomeLayoutViewModel
 import br.iwan.oldpokedex.ui.view_model.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val homeVM by viewModels<HomeViewModel>()
     private val detailsVM by viewModels<DetailsViewModel>()
+    private lateinit var homeLVM: HomeLayoutViewModel
+    private lateinit var detailsLVM: DetailsLayoutViewModel
     private lateinit var navController: NavHostController
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,10 +46,43 @@ class MainActivity : AppCompatActivity() {
         setContent {
             navController = rememberNavController()
 
-            homeVM.listAllPokemon()
+            homeLVM = viewModel()
+            detailsLVM = viewModel()
+
+            observers()
 
             PokeDexTheme {
                 ScreenContent()
+            }
+        }
+    }
+
+    private fun observers() {
+        observePokemonList()
+        observeSuggestions()
+        observePokemonData()
+    }
+
+    private fun observePokemonList() {
+        lifecycleScope.launch {
+            homeVM.pokemonListSF.collect { result ->
+                homeLVM.updatePokemonList(result)
+            }
+        }
+    }
+
+    private fun observeSuggestions() {
+        lifecycleScope.launch {
+            homeVM.suggestionsSF.collect { result ->
+                homeLVM.updateSuggestions(result)
+            }
+        }
+    }
+
+    private fun observePokemonData() {
+        lifecycleScope.launch {
+            detailsVM.pokemonDataSF.collect { result ->
+                detailsLVM.pokemonData = result
             }
         }
     }
@@ -51,6 +91,9 @@ class MainActivity : AppCompatActivity() {
     @Composable
     private fun Preview() {
         navController = rememberNavController()
+
+        homeLVM = viewModel()
+        detailsLVM = viewModel()
 
         PokeDexTheme {
             ScreenContent()
@@ -77,7 +120,9 @@ class MainActivity : AppCompatActivity() {
                 val args = bse.arguments
 
                 destination.route?.let {
-                    if (it.contains(PokemonDetailsScreen::class.java.simpleName)) {
+                    if (it.contains(HomeScreen::class.java.simpleName)) {
+                        homeVM.listAllPokemon()
+                    } else if (it.contains(PokemonDetailsScreen::class.java.simpleName)) {
                         args?.getString("pokemonName")?.let { pokemonName ->
                             detailsVM.findByName(pokemonName)
                         }
@@ -93,7 +138,10 @@ class MainActivity : AppCompatActivity() {
             builder = {
                 composable<HomeScreen> {
                     HomeScreenContent(
-                        viewModel = homeVM,
+                        viewModel = homeLVM,
+                        onSearch = { name ->
+                            homeVM.searchByName(name)
+                        },
                         onPokemonClick = { pokemon ->
                             navController.navigate(PokemonDetailsScreen(pokemonName = pokemon))
                         }
@@ -101,7 +149,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 composable<PokemonDetailsScreen> {
-                    PokemonDetailsScreenContent(viewModel = detailsVM)
+                    PokemonDetailsScreenContent(viewModel = detailsLVM)
                 }
             }
         )

@@ -1,9 +1,6 @@
 package br.iwan.oldpokedex.ui.content
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,7 +15,6 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,23 +26,18 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.iwan.oldpokedex.data.local.entity.PokemonEntity
-import br.iwan.oldpokedex.ui.theme.backgroundColor
-import br.iwan.oldpokedex.ui.view_model.HomeViewModel
+import br.iwan.oldpokedex.ui.view_model.HomeLayoutViewModel
 import kotlinx.coroutines.delay
 
 @Preview
 @Composable
 private fun Preview() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundColor)
-    ) {
+    DefaultPreview {
         HomeScreenContent(
-            viewModel = viewModel<HomeViewModel>().apply {
+            viewModel = viewModel<HomeLayoutViewModel>().apply {
                 searchBarExpanded = false
 
-                pokemonListSF.value.toMutableList().addAll(
+                pokemonList.addAll(
                     listOf(
                         "Bulbasaur",
                         "Ivysaur",
@@ -62,6 +53,7 @@ private fun Preview() {
                     }
                 )
             },
+            onSearch = {},
             onPokemonClick = {}
         )
     }
@@ -69,7 +61,11 @@ private fun Preview() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenContent(viewModel: HomeViewModel, onPokemonClick: (String) -> Unit) {
+fun HomeScreenContent(
+    viewModel: HomeLayoutViewModel,
+    onSearch: (String) -> Unit,
+    onPokemonClick: (String) -> Unit
+) {
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (searchBarRef, listRef) = createRefs()
 
@@ -83,7 +79,7 @@ fun HomeScreenContent(viewModel: HomeViewModel, onPokemonClick: (String) -> Unit
             delay(1000)
 
             if (viewModel.searchBarQuery.length >= 3) {
-                viewModel.searchByName()
+                onSearch(viewModel.searchBarQuery)
             }
         }
 
@@ -99,11 +95,7 @@ fun HomeScreenContent(viewModel: HomeViewModel, onPokemonClick: (String) -> Unit
             suggestionItemsEnabled = true
         }
 
-        val suggestions by viewModel.suggestionsSF.collectAsState()
-
-        LaunchedEffect(suggestions) {
-            viewModel.searchBarExpanded = suggestions.isNotEmpty()
-        }
+        val suggestions = viewModel.suggestions
 
         DockedSearchBar(
             inputField = {
@@ -117,7 +109,7 @@ fun HomeScreenContent(viewModel: HomeViewModel, onPokemonClick: (String) -> Unit
                     onSearch = { text ->
                         viewModel.onSearchBarAction(text, onPokemonClick)
                     },
-                    expanded = viewModel.searchBarExpanded,
+                    expanded = suggestions.isNotEmpty(),
                     onExpandedChange = { _ -> },
                     placeholder = { Text("Digite o nome") },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
@@ -135,7 +127,7 @@ fun HomeScreenContent(viewModel: HomeViewModel, onPokemonClick: (String) -> Unit
                     },
                 )
             },
-            expanded = viewModel.searchBarExpanded,
+            expanded = suggestions.isNotEmpty(),
             onExpandedChange = { _ -> },
             modifier = Modifier.constrainAs(searchBarRef) {
                 top.linkTo(parent.top)
@@ -165,7 +157,7 @@ fun HomeScreenContent(viewModel: HomeViewModel, onPokemonClick: (String) -> Unit
         // ordenar por id, altura, peso, etc.
 
         // Listagem
-        val pokemonList by viewModel.pokemonListSF.collectAsState()
+        val pokemonList = viewModel.pokemonList
 
         LazyColumn(
             modifier = Modifier.constrainAs(listRef) {
