@@ -71,6 +71,9 @@ dependencies {
     implementation(libs.dagger.hilt)
     ksp(libs.dagger.hilt.compiler)
 
+    // Coil - Image handler
+    implementation(libs.coil.compose)
+
     // Other libs
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
