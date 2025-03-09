@@ -17,11 +17,12 @@ class DetailsViewModel @Inject constructor(
     private var _pokemonDataSF = MutableStateFlow<PokemonEntity?>(null)
     val pokemonDataSF: StateFlow<PokemonEntity?> = _pokemonDataSF
 
-    fun findByName(name: String) {
+    fun findById(id: Int) {
         viewModelScope.launch {
-            val res = useCase.findByName(name)
+            val res = useCase.findById(id)
 
             _pokemonDataSF.value = res
         }
     }
+
 }

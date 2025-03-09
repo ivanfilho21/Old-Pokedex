@@ -26,9 +26,9 @@ class PokemonRepository @Inject constructor(
         }
     }
 
-    suspend fun findByName(name: String): PokemonEntity {
+    suspend fun findById(id: Int): PokemonEntity {
         return withContext(ioDispatcher) {
-            pokemonDao.findByName(name)
+            pokemonDao.findById(id)
         }
     }
 

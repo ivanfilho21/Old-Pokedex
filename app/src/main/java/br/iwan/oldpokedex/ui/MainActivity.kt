@@ -21,8 +21,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import br.iwan.oldpokedex.ui.content.HomeScreenContent
 import br.iwan.oldpokedex.ui.content.PokemonDetailsScreenContent
+import br.iwan.oldpokedex.ui.content.PokemonLocationsScreenContent
 import br.iwan.oldpokedex.ui.navigation.HomeScreen
 import br.iwan.oldpokedex.ui.navigation.PokemonDetailsScreen
+import br.iwan.oldpokedex.ui.navigation.PokemonLocationsScreen
 import br.iwan.oldpokedex.ui.theme.PokeDexTheme
 import br.iwan.oldpokedex.ui.theme.backgroundColor
 import br.iwan.oldpokedex.ui.view_model.DetailsLayoutViewModel
@@ -87,6 +89,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private infix fun <T : Any> String?.has(value: T) =
+        this?.contains(value::class.qualifiedName.orEmpty().replace(".Companion", "")) ?: false
+
     @Preview
     @Composable
     private fun Preview() {
@@ -120,12 +125,18 @@ class MainActivity : AppCompatActivity() {
                 val args = bse.arguments
 
                 destination.route?.let {
-                    if (it.contains(HomeScreen::class.java.simpleName)) {
-                        homeVM.listAllPokemon()
-                    } else if (it.contains(PokemonDetailsScreen::class.java.simpleName)) {
-                        args?.getString("pokemonName")?.let { pokemonName ->
-                            detailsVM.findByName(pokemonName)
-                        }
+                    when {
+                        it has HomeScreen -> homeVM.listAllPokemon()
+
+                        it has PokemonDetailsScreen ->
+                            args?.getInt("id")?.let { id ->
+                                detailsVM.findById(id)
+                            }
+
+                        it has PokemonLocationsScreen ->
+                            args?.getInt("id")?.let { _ ->
+                                // call API and then store in db
+                            }
                     }
                 }
             }
@@ -143,13 +154,22 @@ class MainActivity : AppCompatActivity() {
                             homeVM.searchByName(name)
                         },
                         onPokemonClick = { pokemon ->
-                            navController.navigate(PokemonDetailsScreen(pokemonName = pokemon))
+                            navController.navigate(PokemonDetailsScreen(id = pokemon))
                         }
                     )
                 }
 
                 composable<PokemonDetailsScreen> {
-                    PokemonDetailsScreenContent(viewModel = detailsLVM)
+                    PokemonDetailsScreenContent(
+                        viewModel = detailsLVM,
+                        seeLocationsClick = { pokemon ->
+                            navController.navigate(PokemonLocationsScreen(id = pokemon))
+                        }
+                    )
+                }
+
+                composable<PokemonLocationsScreen> {
+                    PokemonLocationsScreenContent()
                 }
             }
         )

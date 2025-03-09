@@ -3,12 +3,11 @@ package br.iwan.oldpokedex.ui.content
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -32,6 +31,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.constraintlayout.compose.Visibility
 import androidx.constraintlayout.compose.atLeast
+import androidx.constraintlayout.compose.atMost
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.iwan.oldpokedex.data.local.entity.PokemonEntity
 import br.iwan.oldpokedex.ui.helper.ColorHelper
@@ -40,6 +40,8 @@ import br.iwan.oldpokedex.ui.theme.backgroundColor
 import br.iwan.oldpokedex.ui.view_model.DetailsLayoutViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import kotlinx.coroutines.delay
+import java.util.UUID
 
 @Preview
 @Composable
@@ -48,21 +50,23 @@ private fun Preview() {
         PokemonDetailsScreenContent(
             viewModel = viewModel<DetailsLayoutViewModel>().apply {
                 pokemonData = PokemonEntity(
+                    UUID.fromString(""),
                     0,
                     "Pokémon name",
-                    LoremIpsum(10).values.joinToString(" "),
+                    LoremIpsum(6).values.joinToString(" "),
                     "Type 1",
                     null,
                     7,
                     69
                 )
-            }
+            },
+            seeLocationsClick = {}
         )
     }
 }
 
 @Composable
-fun PokemonDetailsScreenContent(viewModel: DetailsLayoutViewModel) {
+fun PokemonDetailsScreenContent(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) -> Unit) {
     val pokemonData = viewModel.pokemonData
 
     var bgColors by remember {
@@ -95,7 +99,7 @@ fun PokemonDetailsScreenContent(viewModel: DetailsLayoutViewModel) {
                     width = Dimension.fillToConstraints
                 }
         ) {
-            val (nameRef, descRef, typesRef, aboutRef, locationRef) = createRefs()
+            val (nameRef, descRef, typesRef, aboutRef, statsRef, locationRef) = createRefs()
             val mainContentGuidelineStart = createGuidelineFromStart(16.dp)
             val mainContentGuidelineEnd = createGuidelineFromEnd(16.dp)
 
@@ -145,20 +149,10 @@ fun PokemonDetailsScreenContent(viewModel: DetailsLayoutViewModel) {
                 createHorizontalChain(tp1, div, tp2, chainStyle = ChainStyle.Packed)
             }
 
-            Text(
-                text = pokemonData?.description.orEmpty(),
-                style = AppTypography.bodyLarge,
-                modifier = Modifier.constrainAs(descRef) {
-                    top.linkTo(typesRef.bottom, 16.dp)
-                    centerHorizontallyTo(nameRef)
-                    width = Dimension.fillToConstraints
-                }
-            )
-
             ConstraintLayout(
                 modifier = Modifier.constrainAs(aboutRef) {
-                    top.linkTo(descRef.bottom, 16.dp)
-                    centerHorizontallyTo(descRef)
+                    top.linkTo(typesRef.bottom, 16.dp)
+                    centerHorizontallyTo(nameRef)
                     width = Dimension.fillToConstraints
                 }
             ) {
@@ -178,7 +172,7 @@ fun PokemonDetailsScreenContent(viewModel: DetailsLayoutViewModel) {
                 VerticalDivider(
                     modifier = Modifier.constrainAs(div) {
                         centerTo(parent)
-                        height = Dimension.fillToConstraints
+                        height = Dimension.fillToConstraints.atMost(24.dp)
                     }
                 )
 
@@ -194,15 +188,48 @@ fun PokemonDetailsScreenContent(viewModel: DetailsLayoutViewModel) {
                 )
             }
 
-            PokemonLocationLayout(
-                modifier = Modifier.constrainAs(locationRef) {
-                    top.linkTo(aboutRef.bottom, 24.dp)
-                    bottom.linkTo(parent.bottom)
+            Text(
+                text = pokemonData?.description.orEmpty(),
+                style = AppTypography.bodyLarge,
+                modifier = Modifier.constrainAs(descRef) {
+                    top.linkTo(aboutRef.bottom, 16.dp)
                     centerHorizontallyTo(aboutRef)
-
                     width = Dimension.fillToConstraints
                 }
             )
+
+            StatsLayout(
+                modifier = Modifier.constrainAs(statsRef) {
+                    top.linkTo(descRef.bottom, 16.dp)
+                    centerHorizontallyTo(descRef)
+                    width = Dimension.fillToConstraints
+                }
+            )
+
+            var btnEnabled by remember {
+                mutableStateOf(true)
+            }
+
+            LaunchedEffect(btnEnabled) {
+                if (btnEnabled) return@LaunchedEffect
+                delay(500L)
+                btnEnabled = true
+            }
+
+            Button(
+                enabled = btnEnabled,
+                onClick = {
+                    btnEnabled = false
+                    seeLocationsClick(pokemonData?.id ?: 0)
+                },
+                modifier = Modifier.constrainAs(locationRef) {
+                    top.linkTo(statsRef.bottom, 24.dp)
+                    centerHorizontallyTo(statsRef)
+                    width = Dimension.fillToConstraints
+                }
+            ) {
+                Text(text = "See locations")
+            }
         }
 
         Text(
@@ -299,53 +326,6 @@ private fun InfoLayout(info: String, label: String, modifier: Modifier) {
 }
 
 @Composable
-private fun PokemonLocationLayout(modifier: Modifier) {
-    ConstraintLayout(modifier = modifier) {
-        val (titleRef, listRef) = createRefs()
-
-        Text(
-            text = "Locations",
-            style = AppTypography.titleLarge,
-            modifier = Modifier.constrainAs(titleRef) {
-                top.linkTo(parent.top)
-                centerHorizontallyTo(parent)
-                width = Dimension.fillToConstraints
-            }
-        )
-
-        LazyColumn(
-            userScrollEnabled = false,
-            modifier = Modifier
-                .heightIn(max = 10_000.dp)
-                .constrainAs(listRef) {
-                    top.linkTo(titleRef.bottom, 16.dp)
-                    centerHorizontallyTo(parent)
-                    width = Dimension.fillToConstraints
-                }
-        ) {
-            item {
-                Text(
-                    "Generation + number"
-                )
-            }
-
-            item {
-                Text(
-                    "  Game name (Red, Crystal, Emerald, Platinum, Black 2, etc.)"
-                )
-            }
-
-            item {
-                Text(
-                    "    Location name + method type (rod, grass, etc.)"
-                )
-            }
-
-            item {
-                Text(
-                    "      Encounter rate (i.e from 20% to 24%)"
-                )
-            }
-        }
-    }
+private fun StatsLayout(modifier: Modifier) {
+    Box(modifier = modifier)
 }

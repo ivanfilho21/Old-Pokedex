@@ -2,6 +2,7 @@ package br.iwan.oldpokedex.data.di
 
 import br.iwan.oldpokedex.data.local.AppDatabase
 import br.iwan.oldpokedex.data.local.dao.PokemonDao
+import br.iwan.oldpokedex.data.local.dao.PokemonLocationDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,4 +20,6 @@ object PokemonModule {
     @Provides
     fun providePokemonDao(): PokemonDao = AppDatabase.instance.pokemonDao()
 
+    @Provides
+    fun providePokemonLocationDao(): PokemonLocationDao = AppDatabase.instance.pokemonLocationDao()
 }

@@ -31,8 +31,8 @@ class HomeLayoutViewModel : ViewModel() {
         suggestions.clear()
     }
 
-    fun onSearchBarAction(name: String, navigationAction: (String) -> Unit) {
+    fun onSearchBarAction(id: Int, navigationAction: (Int) -> Unit) {
         clearSuggestions()
-        navigationAction(name)
+        navigationAction(id)
     }
 }

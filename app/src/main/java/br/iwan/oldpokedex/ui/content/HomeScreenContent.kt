@@ -28,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import br.iwan.oldpokedex.data.local.entity.PokemonEntity
 import br.iwan.oldpokedex.ui.view_model.HomeLayoutViewModel
 import kotlinx.coroutines.delay
+import java.util.UUID
 
 @Preview
 @Composable
@@ -49,7 +50,7 @@ private fun Preview() {
                         "Wartortle",
                         "Blastoise"
                     ).mapIndexed { i, it ->
-                        PokemonEntity(i + 1, it)
+                        PokemonEntity(UUID.randomUUID(), i + 1, it)
                     }
                 )
             },
@@ -64,7 +65,7 @@ private fun Preview() {
 fun HomeScreenContent(
     viewModel: HomeLayoutViewModel,
     onSearch: (String) -> Unit,
-    onPokemonClick: (String) -> Unit
+    onPokemonClick: (Int) -> Unit
 ) {
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val (searchBarRef, listRef) = createRefs()
@@ -106,8 +107,8 @@ fun HomeScreenContent(
                             viewModel.searchBarQuery = query
                         }
                     },
-                    onSearch = { text ->
-                        viewModel.onSearchBarAction(text, onPokemonClick)
+                    onSearch = { _ ->
+                        //
                     },
                     expanded = suggestions.isNotEmpty(),
                     onExpandedChange = { _ -> },
@@ -145,7 +146,7 @@ fun HomeScreenContent(
                         modifier = Modifier.clickable(
                             enabled = suggestionItemsEnabled,
                             onClick = {
-                                viewModel.onSearchBarAction(item, onPokemonClick)
+                                //
                             }
                         )
                     )
@@ -179,7 +180,7 @@ fun HomeScreenContent(
                     modifier = Modifier.clickable(
                         enabled = suggestionItemsEnabled,
                         onClick = {
-                            onPokemonClick(item.name.orEmpty())
+                            onPokemonClick(item.id)
                         }
                     )
                 )
