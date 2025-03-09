@@ -8,4 +8,8 @@ import br.iwan.oldpokedex.data.local.entity.PokemonEntity
 
 class DetailsLayoutViewModel : ViewModel() {
     var pokemonData by mutableStateOf<PokemonEntity?>(null)
+
+    fun calculateUnits(unit: Int): String {
+        return unit.toDouble().div(10.0).toString()
+    }
 }

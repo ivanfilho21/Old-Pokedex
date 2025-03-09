@@ -49,7 +49,7 @@ private fun Preview() {
                         "Wartortle",
                         "Blastoise"
                     ).mapIndexed { i, it ->
-                        PokemonEntity(i + 1, it, "")
+                        PokemonEntity(i + 1, it)
                     }
                 )
             },
