@@ -3,7 +3,9 @@ package br.iwan.oldpokedex.ui.content
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -48,7 +50,7 @@ private fun Preview() {
                 pokemonData = PokemonEntity(
                     0,
                     "Pokémon name",
-                    LoremIpsum(20).values.joinToString(" "),
+                    LoremIpsum(10).values.joinToString(" "),
                     "Type 1",
                     null,
                     7,
@@ -93,7 +95,7 @@ fun PokemonDetailsScreenContent(viewModel: DetailsLayoutViewModel) {
                     width = Dimension.fillToConstraints
                 }
         ) {
-            val (nameRef, descRef, typesRef, aboutRef) = createRefs()
+            val (nameRef, descRef, typesRef, aboutRef, locationRef) = createRefs()
             val mainContentGuidelineStart = createGuidelineFromStart(16.dp)
             val mainContentGuidelineEnd = createGuidelineFromEnd(16.dp)
 
@@ -191,6 +193,16 @@ fun PokemonDetailsScreenContent(viewModel: DetailsLayoutViewModel) {
                     }
                 )
             }
+
+            PokemonLocationLayout(
+                modifier = Modifier.constrainAs(locationRef) {
+                    top.linkTo(aboutRef.bottom, 24.dp)
+                    bottom.linkTo(parent.bottom)
+                    centerHorizontallyTo(aboutRef)
+
+                    width = Dimension.fillToConstraints
+                }
+            )
         }
 
         Text(
@@ -242,7 +254,7 @@ fun PokemonDetailsScreenContent(viewModel: DetailsLayoutViewModel) {
 }
 
 @Composable
-private fun TypeLayout(type: String?, modifier: Modifier = Modifier) {
+private fun TypeLayout(type: String?, modifier: Modifier) {
     Text(
         text = type.orEmpty(),
         style = AppTypography.bodyLarge.copy(
@@ -283,5 +295,57 @@ private fun InfoLayout(info: String, label: String, modifier: Modifier) {
                 width = Dimension.fillToConstraints
             }
         )
+    }
+}
+
+@Composable
+private fun PokemonLocationLayout(modifier: Modifier) {
+    ConstraintLayout(modifier = modifier) {
+        val (titleRef, listRef) = createRefs()
+
+        Text(
+            text = "Locations",
+            style = AppTypography.titleLarge,
+            modifier = Modifier.constrainAs(titleRef) {
+                top.linkTo(parent.top)
+                centerHorizontallyTo(parent)
+                width = Dimension.fillToConstraints
+            }
+        )
+
+        LazyColumn(
+            userScrollEnabled = false,
+            modifier = Modifier
+                .heightIn(max = 10_000.dp)
+                .constrainAs(listRef) {
+                    top.linkTo(titleRef.bottom, 16.dp)
+                    centerHorizontallyTo(parent)
+                    width = Dimension.fillToConstraints
+                }
+        ) {
+            item {
+                Text(
+                    "Generation + number"
+                )
+            }
+
+            item {
+                Text(
+                    "  Game name (Red, Crystal, Emerald, Platinum, Black 2, etc.)"
+                )
+            }
+
+            item {
+                Text(
+                    "    Location name + method type (rod, grass, etc.)"
+                )
+            }
+
+            item {
+                Text(
+                    "      Encounter rate (i.e from 20% to 24%)"
+                )
+            }
+        }
     }
 }
