@@ -31,6 +31,7 @@ import br.iwan.oldpokedex.ui.view_model.DetailsLayoutViewModel
 import br.iwan.oldpokedex.ui.view_model.DetailsViewModel
 import br.iwan.oldpokedex.ui.view_model.HomeLayoutViewModel
 import br.iwan.oldpokedex.ui.view_model.HomeViewModel
+import br.iwan.oldpokedex.ui.view_model.LocationsLayoutViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -40,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     private val detailsVM by viewModels<DetailsViewModel>()
     private lateinit var homeLVM: HomeLayoutViewModel
     private lateinit var detailsLVM: DetailsLayoutViewModel
+    private lateinit var locationsLVM: LocationsLayoutViewModel
     private lateinit var navController: NavHostController
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,6 +52,7 @@ class MainActivity : AppCompatActivity() {
 
             homeLVM = viewModel()
             detailsLVM = viewModel()
+            locationsLVM = viewModel()
 
             observers()
 
@@ -99,6 +102,7 @@ class MainActivity : AppCompatActivity() {
 
         homeLVM = viewModel()
         detailsLVM = viewModel()
+        locationsLVM = viewModel()
 
         PokeDexTheme {
             ScreenContent()
@@ -169,7 +173,9 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 composable<PokemonLocationsScreen> {
-                    PokemonLocationsScreenContent()
+                    PokemonLocationsScreenContent(
+                        viewModel = locationsLVM
+                    )
                 }
             }
         )

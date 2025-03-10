@@ -7,4 +7,9 @@ object PokemonHelper {
         if (minLevel == maxLevel) minLevel?.toString().orEmpty()
         else "${minLevel?.toString() ?: ""} - ${maxLevel?.toString() ?: ""}"
     }
+
+    fun String.capitalizeWords() =
+        this.split('-').joinToString(" ") {
+            it.replaceFirstChar { c -> c.uppercaseChar() }
+        }
 }

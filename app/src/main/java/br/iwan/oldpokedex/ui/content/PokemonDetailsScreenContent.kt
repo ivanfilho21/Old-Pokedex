@@ -50,7 +50,7 @@ private fun Preview() {
         PokemonDetailsScreenContent(
             viewModel = viewModel<DetailsLayoutViewModel>().apply {
                 pokemonData = PokemonEntity(
-                    UUID.fromString(""),
+                    UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
                     0,
                     "Pokémon name",
                     LoremIpsum(6).values.joinToString(" "),
