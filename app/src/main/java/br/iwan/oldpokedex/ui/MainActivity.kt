@@ -8,17 +8,17 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import br.iwan.oldpokedex.data.model.UiResponse
 import br.iwan.oldpokedex.ui.content.HomeScreenContent
 import br.iwan.oldpokedex.ui.content.PokemonDetailsScreenContent
 import br.iwan.oldpokedex.ui.content.PokemonLocationsScreenContent
@@ -36,7 +36,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedListener {
     private val homeVM by viewModels<HomeViewModel>()
     private val detailsVM by viewModels<DetailsViewModel>()
     private lateinit var homeLVM: HomeLayoutViewModel
@@ -48,7 +48,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            navController = rememberNavController()
+            navController = rememberNavController().apply {
+                addOnDestinationChangedListener(this@MainActivity)
+            }
 
             homeLVM = viewModel()
             detailsLVM = viewModel()
@@ -62,6 +64,32 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestinationChanged(
+        controller: NavController,
+        destination: NavDestination,
+        arguments: Bundle?
+    ) {
+        destination.route?.let {
+            when {
+                it has HomeScreen -> homeVM.listAllPokemon()
+
+                it has PokemonDetailsScreen ->
+                    arguments?.getInt("id")?.let { id ->
+                        detailsVM.findById(id)
+                    }
+
+                it has PokemonLocationsScreen ->
+                    arguments?.getInt("id")?.let { _ ->
+                        // call API and then store in db
+                    }
+
+                else -> {
+                    // nothing yet
+                }
+            }
+        }
+    }
+
     private fun observers() {
         observePokemonList()
         observeSuggestions()
@@ -71,7 +99,13 @@ class MainActivity : AppCompatActivity() {
     private fun observePokemonList() {
         lifecycleScope.launch {
             homeVM.pokemonListSF.collect { result ->
-                homeLVM.updatePokemonList(result)
+                when (result) {
+                    is UiResponse.Success -> homeLVM.updatePokemonList(result.data)
+
+                    is UiResponse.Error -> homeLVM.error = result.message
+
+                    is UiResponse.Loading -> homeLVM.loading = true
+                }
             }
         }
     }
@@ -79,7 +113,13 @@ class MainActivity : AppCompatActivity() {
     private fun observeSuggestions() {
         lifecycleScope.launch {
             homeVM.suggestionsSF.collect { result ->
-                homeLVM.updateSuggestions(result)
+                when (result) {
+                    is UiResponse.Success -> homeLVM.updateSuggestions(result.data)
+
+                    else -> {
+                        // nothing yet
+                    }
+                }
             }
         }
     }
@@ -121,31 +161,6 @@ class MainActivity : AppCompatActivity() {
 
     @Composable
     private fun Navigation(innerPadding: PaddingValues) {
-        val currentBackStackEntry by navController.currentBackStackEntryAsState()
-
-        LaunchedEffect(currentBackStackEntry) {
-            currentBackStackEntry?.let { bse ->
-                val destination = bse.destination
-                val args = bse.arguments
-
-                destination.route?.let {
-                    when {
-                        it has HomeScreen -> homeVM.listAllPokemon()
-
-                        it has PokemonDetailsScreen ->
-                            args?.getInt("id")?.let { id ->
-                                detailsVM.findById(id)
-                            }
-
-                        it has PokemonLocationsScreen ->
-                            args?.getInt("id")?.let { _ ->
-                                // call API and then store in db
-                            }
-                    }
-                }
-            }
-        }
-
         NavHost(
             navController = navController,
             startDestination = HomeScreen,
@@ -159,6 +174,9 @@ class MainActivity : AppCompatActivity() {
                         },
                         onPokemonClick = { pokemon ->
                             navController.navigate(PokemonDetailsScreen(id = pokemon))
+                        },
+                        onTryAgainClick = {
+                            homeVM.listAllPokemon()
                         }
                     )
                 }

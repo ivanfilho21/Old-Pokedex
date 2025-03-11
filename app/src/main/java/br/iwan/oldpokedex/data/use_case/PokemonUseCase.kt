@@ -10,7 +10,7 @@ class PokemonUseCase @Inject constructor(
 ) {
     suspend fun listAll() = pokemonRepository.listAll()
 
-    suspend fun searchByName(query: String) = pokemonRepository.searchByName(query)
+    suspend fun getSuggestionsFromQuery(query: String) = pokemonRepository.searchByName(query)
 
     suspend fun findById(id: Int) = pokemonRepository.findById(id)
 

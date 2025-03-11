@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import br.iwan.oldpokedex.data.local.entity.PokemonEntity
 
 class HomeLayoutViewModel : ViewModel() {
+    var error by mutableStateOf<String?>(null)
+    var loading by mutableStateOf(false)
     var searchBarExpanded by mutableStateOf(false)
     var searchBarQuery by mutableStateOf("")
     val suggestions = mutableStateListOf<String>()

@@ -1,6 +1,7 @@
 package br.iwan.oldpokedex.ui.content
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -55,7 +56,8 @@ private fun Preview() {
                 )
             },
             onSearch = {},
-            onPokemonClick = {}
+            onPokemonClick = {},
+            onTryAgainClick = {}
         )
     }
 }
@@ -65,9 +67,10 @@ private fun Preview() {
 fun HomeScreenContent(
     viewModel: HomeLayoutViewModel,
     onSearch: (String) -> Unit,
-    onPokemonClick: (Int) -> Unit
+    onPokemonClick: (Int) -> Unit,
+    onTryAgainClick: () -> Unit
 ) {
-    ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
+    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (searchBarRef, listRef) = createRefs()
 
         // Barra de pesquisa para filtrar por nome
@@ -77,7 +80,7 @@ fun HomeScreenContent(
 
             viewModel.clearSuggestions()
 
-            delay(1000)
+            delay(100)
 
             if (viewModel.searchBarQuery.length >= 3) {
                 onSearch(viewModel.searchBarQuery)
@@ -157,34 +160,71 @@ fun HomeScreenContent(
         // menu para filtrar por tipo, etc.
         // ordenar por id, altura, peso, etc.
 
-        // Listagem
-        val pokemonList = viewModel.pokemonList
+        viewModel.error?.let {
+            ErrorLayout(
+                onTryAgainClick = onTryAgainClick,
+                modifier = Modifier.constrainAs(listRef) {
+                    top.linkTo(searchBarRef.bottom, 24.dp)
+                    bottom.linkTo(parent.bottom, 16.dp)
+                    centerHorizontallyTo(searchBarRef)
+                    width = Dimension.fillToConstraints
+                }
+            )
+        } ?: run {
+            MainContent(
+                pokemonList = viewModel.pokemonList,
+                onPokemonClick = onPokemonClick,
+                modifier = Modifier.constrainAs(listRef) {
+                    top.linkTo(searchBarRef.bottom)
+                    bottom.linkTo(parent.bottom)
+                    centerHorizontallyTo(searchBarRef)
 
-        LazyColumn(
-            modifier = Modifier.constrainAs(listRef) {
-                top.linkTo(searchBarRef.bottom, 24.dp)
-                centerHorizontallyTo(searchBarRef)
-                width = Dimension.fillToConstraints
-            }
-        ) {
-            items(items = pokemonList) { item ->
-                ListItem(
-                    headlineContent = {
-                        Text(text = item.name.orEmpty())
-                    },
-                    leadingContent = {
-                        Text(
-                            text = "${item.id}"
-                        )
-                    },
-                    modifier = Modifier.clickable(
-                        enabled = suggestionItemsEnabled,
-                        onClick = {
-                            onPokemonClick(item.id)
-                        }
+                    Dimension.fillToConstraints.let {
+                        width = it
+                        height = it
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun MainContent(
+    pokemonList: List<PokemonEntity>,
+    onPokemonClick: (Int) -> Unit,
+    modifier: Modifier
+) {
+    var itemEnabled by remember {
+        mutableStateOf(true)
+    }
+
+    LaunchedEffect(itemEnabled) {
+        if (itemEnabled) return@LaunchedEffect
+
+        delay(500)
+
+        itemEnabled = true
+    }
+
+    LazyColumn(modifier = modifier) {
+        items(items = pokemonList) { item ->
+            ListItem(
+                headlineContent = {
+                    Text(text = item.name.orEmpty())
+                },
+                leadingContent = {
+                    Text(
+                        text = "${item.id}"
                     )
+                },
+                modifier = Modifier.clickable(
+                    enabled = itemEnabled,
+                    onClick = {
+                        onPokemonClick(item.id)
+                    }
                 )
-            }
+            )
         }
     }
 }
