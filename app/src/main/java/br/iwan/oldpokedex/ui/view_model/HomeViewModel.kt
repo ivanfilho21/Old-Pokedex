@@ -15,8 +15,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val useCase: PokemonUseCase
 ) : ViewModel() {
-    private val _pokemonListSF = MutableStateFlow<UiResponse<List<PokemonEntity>>>(UiResponse.Loading)
-    private val _suggestionsSF = MutableStateFlow<UiResponse<List<String>>>(UiResponse.Loading)
+    private val _pokemonListSF = MutableStateFlow<UiResponse<List<PokemonEntity>>>(UiResponse.None)
+    private val _suggestionsSF = MutableStateFlow<UiResponse<List<String>>>(UiResponse.None)
     val pokemonListSF: StateFlow<UiResponse<List<PokemonEntity>>> = _pokemonListSF
     val suggestionsSF: StateFlow<UiResponse<List<String>>> = _suggestionsSF
 

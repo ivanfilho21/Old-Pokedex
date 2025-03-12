@@ -3,6 +3,7 @@ package br.iwan.oldpokedex.data.local.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import br.iwan.oldpokedex.data.local.entity.PokemonEntity
 
 @Dao
@@ -21,4 +22,7 @@ interface PokemonDao {
 
     @Insert
     fun insertAll(vararg pokemon: PokemonEntity)
+
+    @Update
+    fun update(pokemon: PokemonEntity)
 }

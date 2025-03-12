@@ -71,12 +71,12 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     ) {
         destination.route?.let {
             when {
-                it has HomeScreen -> homeVM.listAllPokemon()
+                it has HomeScreen -> listPokemon()
 
-                it has PokemonDetailsScreen ->
-                    arguments?.getInt("id")?.let { id ->
-                        detailsVM.findById(id)
-                    }
+                it has PokemonDetailsScreen -> {
+                    detailsLVM.currentId = arguments?.getInt("id")
+                    getPokemonDetails()
+                }
 
                 it has PokemonLocationsScreen ->
                     arguments?.getInt("id")?.let { _ ->
@@ -93,41 +93,61 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     private fun observers() {
         observePokemonList()
         observeSuggestions()
-        observePokemonData()
+        observePokemonDetails()
     }
 
     private fun observePokemonList() {
         lifecycleScope.launch {
-            homeVM.pokemonListSF.collect { result ->
-                when (result) {
-                    is UiResponse.Success -> homeLVM.updatePokemonList(result.data)
+            homeVM.pokemonListSF.collect {
+                homeLVM.loading = false
 
-                    is UiResponse.Error -> homeLVM.error = result.message
+                if (it is UiResponse.Success)
+                    homeLVM.updatePokemonList(it.data)
 
-                    is UiResponse.Loading -> homeLVM.loading = true
-                }
+                if (it is UiResponse.Error)
+                    homeLVM.error = it.message
             }
         }
     }
 
     private fun observeSuggestions() {
         lifecycleScope.launch {
-            homeVM.suggestionsSF.collect { result ->
-                when (result) {
-                    is UiResponse.Success -> homeLVM.updateSuggestions(result.data)
-
-                    else -> {
-                        // nothing yet
-                    }
-                }
+            homeVM.suggestionsSF.collect {
+                if (it is UiResponse.Success)
+                    homeLVM.updateSuggestions(it.data)
             }
         }
     }
 
-    private fun observePokemonData() {
+    private fun observePokemonDetails() {
         lifecycleScope.launch {
-            detailsVM.pokemonDataSF.collect { result ->
-                detailsLVM.pokemonData = result
+            detailsVM.pokemonDataSF.collect {
+                detailsLVM.loading = false
+
+                if (it is UiResponse.Success)
+                    detailsLVM.pokemonData = it.data
+
+                if (it is UiResponse.Error)
+                    detailsLVM.error = it.message
+            }
+        }
+    }
+
+    private fun listPokemon() {
+        if (homeLVM.pokemonList.isEmpty()) {
+            homeLVM.loading = true
+            homeVM.listAllPokemon()
+        }
+    }
+
+    private fun getPokemonDetails() {
+        detailsLVM.run {
+            if (pokemonData == null) {
+                loading = true
+
+                currentId?.let {
+                    detailsVM.getDetails(it)
+                }
             }
         }
     }
@@ -173,11 +193,10 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
                             homeVM.searchByName(name)
                         },
                         onPokemonClick = { pokemon ->
+                            detailsLVM.currentId = pokemon
                             navController.navigate(PokemonDetailsScreen(id = pokemon))
                         },
-                        onTryAgainClick = {
-                            homeVM.listAllPokemon()
-                        }
+                        onTryAgainClick = ::listPokemon
                     )
                 }
 
@@ -186,7 +205,8 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
                         viewModel = detailsLVM,
                         seeLocationsClick = { pokemon ->
                             navController.navigate(PokemonLocationsScreen(id = pokemon))
-                        }
+                        },
+                        onTryAgain = ::getPokemonDetails
                     )
                 }
 

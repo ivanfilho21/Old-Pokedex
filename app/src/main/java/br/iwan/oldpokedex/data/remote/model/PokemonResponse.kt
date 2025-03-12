@@ -2,8 +2,19 @@ package br.iwan.oldpokedex.data.remote.model
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class PokemonResponse(
-    val name: String? = null,
-    val url: String? = null
-)
+object PokemonResponse {
+    @Serializable
+    data class Data(
+        val name: String? = null,
+        val url: String? = null,
+        val height: Int? = null,
+        val weight: Int? = null,
+        val types: List<PokemonType>? = null
+    )
+
+    @Serializable
+    data class PokemonType(val type: Type? = null)
+
+    @Serializable
+    data class Type(val name: String? = null)
+}

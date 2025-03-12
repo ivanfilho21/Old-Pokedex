@@ -7,6 +7,9 @@ import androidx.lifecycle.ViewModel
 import br.iwan.oldpokedex.data.local.entity.PokemonEntity
 
 class DetailsLayoutViewModel : ViewModel() {
+    var currentId: Int? = null
+    var loading by mutableStateOf(false)
+    var error by mutableStateOf<String?>(null)
     var pokemonData by mutableStateOf<PokemonEntity?>(null)
 
     fun calculateUnits(unit: Int): String {

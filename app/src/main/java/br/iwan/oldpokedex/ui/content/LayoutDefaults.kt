@@ -13,6 +13,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import br.iwan.oldpokedex.BuildConfig
 import br.iwan.oldpokedex.ui.theme.AppTypography
 import br.iwan.oldpokedex.ui.theme.PokeDexTheme
 import br.iwan.oldpokedex.ui.theme.backgroundColor
@@ -31,7 +32,7 @@ fun DefaultPreview(content: @Composable BoxScope.() -> Unit) {
 
 @Composable
 fun ErrorLayout(
-    message: String = "There was an error.",
+    debugMessage: String? = null,
     onTryAgainClick: () -> Unit,
     modifier: Modifier
 ) {
@@ -39,7 +40,7 @@ fun ErrorLayout(
         val (msgRef, btnRef) = createRefs()
 
         Text(
-            text = message,
+            text = debugMessage?.let { if (BuildConfig.DEBUG) it else null } ?: "There was an error while loading this page.",
             style = AppTypography.bodyMedium.copy(
                 textAlign = TextAlign.Center
             ),
