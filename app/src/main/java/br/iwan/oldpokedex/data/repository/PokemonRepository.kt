@@ -77,10 +77,12 @@ class PokemonRepository @Inject constructor(
                 is ApiRequestResult.Success -> json.decodeFromString<PokemonResponse.Data>(res.data)
                     .let { remotePokemon ->
                         val pokeTypes = remotePokemon.types?.mapNotNull { it.type?.name }.orEmpty()
+                        val firstType = pokeTypes.firstOrNull()
+                        val secondType = pokeTypes.lastOrNull().let { if (it == firstType) null else it }
 
                         pokemon.apply {
-                            type1 = pokeTypes.firstOrNull()
-                            type2 = pokeTypes.lastOrNull()
+                            type1 = firstType
+                            type2 = secondType
                             height = remotePokemon.height
                             weight = remotePokemon.weight
                         }.let {
@@ -103,9 +105,7 @@ class PokemonRepository @Inject constructor(
                             it.language?.name?.equals("en", true) == true &&
                                     it.version?.name?.equals("yellow", true) == true
                         }?.firstNotNullOfOrNull {
-                            it.text?.trim()
-                                ?.replace("\n", "")
-                                ?.replace("\t", "")
+                            it.text?.trim()?.replace("\n", " ")
                         }
 
                         pokemon.apply {
