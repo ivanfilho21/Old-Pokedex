@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -55,13 +56,11 @@ private fun Preview() {
                     0,
                     "Pokémon name",
                     LoremIpsum(6).values.joinToString(" "),
-                    "Type 1",
-                    null,
+                    "water",
+                    "dragon",
                     7,
                     69
                 )
-
-                loading = true
             },
             seeLocationsClick = {},
             onTryAgain = {}
@@ -256,6 +255,9 @@ private fun MainLayout(viewModel: DetailsLayoutViewModel, seeLocationsClick: (In
                     btnEnabled = false
                     seeLocationsClick(pokemonData?.id ?: 0)
                 },
+                colors = ButtonDefaults.buttonColors().copy(
+                    containerColor = ColorHelper.getColorByPokemonType(pokemonData?.type1)
+                ),
                 modifier = Modifier.constrainAs(locationRef) {
                     top.linkTo(statsRef.bottom, 24.dp)
                     centerHorizontallyTo(statsRef)
