@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -27,6 +28,38 @@ fun DefaultPreview(content: @Composable BoxScope.() -> Unit) {
                 .background(backgroundColor),
             content = content
         )
+    }
+}
+
+@Composable
+fun MainLayout(
+    isLoading: Boolean,
+    error: String?,
+    onTryAgainClick: () -> Unit,
+    modifier: Modifier? = null,
+    mainContent: @Composable () -> Unit
+) {
+    ConstraintLayout(modifier = modifier ?: Modifier.fillMaxSize()) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.constrainAs(createRef()) {
+                    centerTo(parent)
+                }
+            )
+        } else {
+            error?.let {
+                ErrorLayout(
+                    debugMessage = it,
+                    onTryAgainClick = onTryAgainClick,
+                    modifier = Modifier.constrainAs(createRef()) {
+                        centerTo(parent)
+                        width = Dimension.fillToConstraints
+                    }
+                )
+            }
+        } ?: run {
+            mainContent()
+        }
     }
 }
 

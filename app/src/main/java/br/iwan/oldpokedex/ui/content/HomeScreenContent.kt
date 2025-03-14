@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -25,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -105,42 +103,32 @@ fun HomeScreenContent(
             }
         )
 
-        if (viewModel.loading) {
-            CircularProgressIndicator(
+        MainLayout(
+            isLoading = viewModel.loading,
+            error = viewModel.error,
+            onTryAgainClick = onTryAgainClick,
+            modifier = Modifier.constrainAs(listRef) {
+                top.linkTo(searchBarRef.bottom)
+                bottom.linkTo(parent.bottom)
+                centerHorizontallyTo(searchBarRef)
+
+                Dimension.fillToConstraints.let {
+                    width = it
+                    height = it
+                }
+            }
+        ) {
+            Content(
+                pokemonList = viewModel.pokemonList,
+                onPokemonClick = onPokemonClick,
                 modifier = Modifier.constrainAs(createRef()) {
-                    centerHorizontallyTo(searchBarRef)
-                    top.linkTo(searchBarRef.bottom)
-                    bottom.linkTo(parent.bottom)
+                    centerTo(parent)
+                    Dimension.fillToConstraints.let {
+                        width = it
+                        height = it
+                    }
                 }
             )
-        } else {
-            viewModel.error?.let {
-                ErrorLayout(
-                    debugMessage = it,
-                    onTryAgainClick = onTryAgainClick,
-                    modifier = Modifier.constrainAs(listRef) {
-                        top.linkTo(searchBarRef.bottom, 24.dp)
-                        bottom.linkTo(parent.bottom, 16.dp)
-                        centerHorizontallyTo(searchBarRef)
-                        width = Dimension.fillToConstraints
-                    }
-                )
-            } ?: run {
-                MainContent(
-                    pokemonList = viewModel.pokemonList,
-                    onPokemonClick = onPokemonClick,
-                    modifier = Modifier.constrainAs(listRef) {
-                        top.linkTo(searchBarRef.bottom)
-                        bottom.linkTo(parent.bottom)
-                        centerHorizontallyTo(searchBarRef)
-
-                        Dimension.fillToConstraints.let {
-                            width = it
-                            height = it
-                        }
-                    }
-                )
-            }
         }
     }
 }
@@ -216,7 +204,7 @@ private fun SearchBarContent(
 }
 
 @Composable
-private fun MainContent(
+private fun Content(
     pokemonList: List<PokemonEntity>,
     onPokemonClick: (Int) -> Unit,
     modifier: Modifier

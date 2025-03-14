@@ -9,7 +9,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -63,7 +62,7 @@ private fun Preview() {
                 )
             },
             seeLocationsClick = {},
-            onTryAgain = {}
+            onTryAgainClick = {}
         )
     }
 }
@@ -72,34 +71,19 @@ private fun Preview() {
 fun PokemonDetailsScreenContent(
     viewModel: DetailsLayoutViewModel,
     seeLocationsClick: (Int) -> Unit,
-    onTryAgain: () -> Unit
+    onTryAgainClick: () -> Unit
 ) {
-    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-        if (viewModel.loading) {
-            CircularProgressIndicator(
-                modifier = Modifier.constrainAs(createRef()) {
-                    centerTo(parent)
-                }
-            )
-        } else {
-            viewModel.error?.let {
-                ErrorLayout(
-                    debugMessage = it,
-                    onTryAgainClick = onTryAgain,
-                    modifier = Modifier.constrainAs(createRef()) {
-                        centerTo(parent)
-                        width = Dimension.fillToConstraints
-                    }
-                )
-            } ?: run {
-                MainLayout(viewModel, seeLocationsClick)
-            }
-        }
+    MainLayout(
+        isLoading = viewModel.loading,
+        error = viewModel.error,
+        onTryAgainClick = onTryAgainClick
+    ) {
+        Content(viewModel, seeLocationsClick)
     }
 }
 
 @Composable
-private fun MainLayout(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) -> Unit) {
+private fun Content(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) -> Unit) {
     val pokemonData = viewModel.pokemonData
 
     var bgColors by remember {
