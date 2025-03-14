@@ -187,10 +187,7 @@ private fun Content(viewModel: LocationsLayoutViewModel) {
                                     )
 
                                     Text(
-                                        text = encounter.chance?.toString()
-                                            .orEmpty() + "% chance of finding LV " + PokemonHelper.mergePokemonEncounterLevel(
-                                            encounter
-                                        ) + ".",
+                                        text = PokemonHelper.getEncounterText(encounter),
                                         style = AppTypography.bodySmall,
                                         modifier = Modifier.constrainAs(lvRef) {
                                             top.linkTo(methodRef.bottom, 4.dp)
