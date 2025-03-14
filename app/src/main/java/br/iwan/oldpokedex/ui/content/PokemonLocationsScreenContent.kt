@@ -1,9 +1,9 @@
 package br.iwan.oldpokedex.ui.content
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -113,17 +113,17 @@ private fun Content(viewModel: LocationsLayoutViewModel) {
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
         val (titleRef, listRef) = createRefs()
 
         Text(
-            text = "Locations",
+            text = "Encounters locations in games for $",
             style = AppTypography.titleLarge,
             modifier = Modifier.constrainAs(titleRef) {
-                top.linkTo(parent.top)
-                centerHorizontallyTo(parent)
+                top.linkTo(parent.top, 16.dp)
+                start.linkTo(parent.start, 16.dp)
+                end.linkTo(parent.end, 16.dp)
                 width = Dimension.fillToConstraints
             }
         )
@@ -131,6 +131,7 @@ private fun Content(viewModel: LocationsLayoutViewModel) {
         LazyColumn(
             userScrollEnabled = false,
             verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(16.dp),
             modifier = Modifier
                 .heightIn(max = locations.size.times(1_000).dp)
                 .constrainAs(listRef) {
