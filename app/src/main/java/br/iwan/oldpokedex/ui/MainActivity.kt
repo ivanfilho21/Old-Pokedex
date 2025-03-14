@@ -32,6 +32,7 @@ import br.iwan.oldpokedex.ui.view_model.DetailsViewModel
 import br.iwan.oldpokedex.ui.view_model.HomeLayoutViewModel
 import br.iwan.oldpokedex.ui.view_model.HomeViewModel
 import br.iwan.oldpokedex.ui.view_model.LocationsLayoutViewModel
+import br.iwan.oldpokedex.ui.view_model.LocationsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -39,6 +40,7 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedListener {
     private val homeVM by viewModels<HomeViewModel>()
     private val detailsVM by viewModels<DetailsViewModel>()
+    private val locationsVM by viewModels<LocationsViewModel>()
     private lateinit var homeLVM: HomeLayoutViewModel
     private lateinit var detailsLVM: DetailsLayoutViewModel
     private lateinit var locationsLVM: LocationsLayoutViewModel
@@ -78,10 +80,10 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
                     getPokemonDetails()
                 }
 
-                it has PokemonLocationsScreen ->
-                    arguments?.getInt("id")?.let { _ ->
-                        // call API and then store in db
-                    }
+                it has PokemonLocationsScreen -> {
+                    locationsLVM.currentId = arguments?.getInt("id")
+                    getPokemonLocations()
+                }
 
                 else -> {
                     // nothing yet
@@ -94,6 +96,7 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         observePokemonList()
         observeSuggestions()
         observePokemonDetails()
+        observePokemonLocations()
     }
 
     private fun observePokemonList() {
@@ -133,6 +136,20 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         }
     }
 
+    private fun observePokemonLocations() {
+        lifecycleScope.launch {
+            locationsVM.locationsSF.collect {
+                locationsLVM.loading = false
+
+                if (it is UiResponse.Success)
+                    locationsLVM.locationData = it.data
+
+                if (it is UiResponse.Error)
+                    locationsLVM.error = it.message
+            }
+        }
+    }
+
     private fun listPokemon() {
         if (homeLVM.pokemonList.isEmpty()) {
             homeLVM.loading = true
@@ -142,11 +159,21 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
 
     private fun getPokemonDetails() {
         detailsLVM.run {
-            if (pokemonData == null) {
-                loading = true
+            currentId?.let { id ->
+                if (pokemonData?.id != id) {
+                    loading = true
+                    detailsVM.getDetails(id)
+                }
+            }
+        }
+    }
 
-                currentId?.let {
-                    detailsVM.getDetails(it)
+    private fun getPokemonLocations() {
+        locationsLVM.run {
+            currentId?.let { id ->
+                if (locationData?.pokemonId != id) {
+                    loading = true
+                    locationsVM.getLocationsByPokemonId(id)
                 }
             }
         }
@@ -206,13 +233,14 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
                         seeLocationsClick = { pokemon ->
                             navController.navigate(PokemonLocationsScreen(id = pokemon))
                         },
-                        onTryAgain = ::getPokemonDetails
+                        onTryAgainClick = ::getPokemonDetails
                     )
                 }
 
                 composable<PokemonLocationsScreen> {
                     PokemonLocationsScreenContent(
-                        viewModel = locationsLVM
+                        viewModel = locationsLVM,
+                        onTryAgainClick = ::getPokemonLocations
                     )
                 }
             }

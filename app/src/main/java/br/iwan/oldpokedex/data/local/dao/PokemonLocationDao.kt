@@ -8,8 +8,8 @@ import br.iwan.oldpokedex.data.local.entity.PokemonLocationEntity
 @Dao
 interface PokemonLocationDao {
     @Query("SELECT * FROM location WHERE pokemonId = :pokemonId")
-    fun findByPokemonId(pokemonId: Int): List<PokemonLocationEntity>
+    fun findByPokemonId(pokemonId: Int): PokemonLocationEntity?
 
     @Insert
-    fun insertAll(list: List<PokemonLocationEntity>)
+    fun insert(list: PokemonLocationEntity)
 }

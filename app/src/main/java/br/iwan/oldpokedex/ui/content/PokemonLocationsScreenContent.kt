@@ -19,6 +19,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.iwan.oldpokedex.data.local.entity.PokemonLocationEntity
 import br.iwan.oldpokedex.data.model.EncounterInGame
+import br.iwan.oldpokedex.data.model.Location
 import br.iwan.oldpokedex.data.model.VersionDetails
 import br.iwan.oldpokedex.ui.helper.PokemonHelper
 import br.iwan.oldpokedex.ui.helper.PokemonHelper.capitalizeWords
@@ -32,50 +33,88 @@ private fun Preview() {
     DefaultPreview {
         PokemonLocationsScreenContent(
             viewModel = viewModel<LocationsLayoutViewModel>().apply {
-                pokemonLocations.addAll(listOf(
-                    PokemonLocationEntity(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"), 60, "seafoam-islands-b4f", listOf(
-                        VersionDetails("red", listOf(
-                            EncounterInGame("good-rod", null, 50, 10, 10),
-                            EncounterInGame("surf", null, 30, 20, 25),
-                        )),
-                        VersionDetails("blue", listOf(
-                            EncounterInGame("good-rod", null, 50, 10, 10),
-                            EncounterInGame("surf", null, 30, 20, 25),
-                        )),
-                        VersionDetails("yellow", listOf(
-                            EncounterInGame("walk", null, 50, 10, 10),
-                            EncounterInGame("walk", null, 28, 26, 29),
-                            EncounterInGame("surf", null, 30, 20, 25),
-                        ))
-                    )),
-                    PokemonLocationEntity(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"), 60, "viridian-city-area", listOf(
-                        VersionDetails("red", listOf(
-                            EncounterInGame("gift", null, 30, 10, 10),
-                            EncounterInGame("surf", null, 20, 20, 25),
-                        )),
-                        VersionDetails("blue", listOf(
-                            EncounterInGame("old-rod", null, 50, 10, 10),
-                            EncounterInGame("surf", null, 30, 20, 25),
-                        )),
-                        VersionDetails("silver", listOf(
-                            EncounterInGame("super-rod", null, 50, 10, 10),
-                            EncounterInGame("surf", null, 30, 20, 25),
-                        ))
-                    )),
-                ))
-            }
+                locationData = PokemonLocationEntity(
+                    UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+                    0,
+                    listOf(
+                        Location(
+                            "seafoam-islands-b4f",
+                            listOf(
+                                VersionDetails(
+                                    "red", listOf(
+                                        EncounterInGame("good-rod", null, 50, 10, 10),
+                                        EncounterInGame("surf", null, 30, 20, 25),
+                                    )
+                                ),
+                                VersionDetails(
+                                    "blue", listOf(
+                                        EncounterInGame("good-rod", null, 50, 10, 10),
+                                        EncounterInGame("surf", null, 30, 20, 25),
+                                    )
+                                ),
+                                VersionDetails(
+                                    "yellow", listOf(
+                                        EncounterInGame("walk", null, 50, 10, 10),
+                                        EncounterInGame("walk", null, 28, 26, 29),
+                                        EncounterInGame("surf", null, 30, 20, 25),
+                                    )
+                                )
+                            )
+                        ),
+                        Location(
+                            "viridian-city-area",
+                            listOf(
+                                VersionDetails(
+                                    "red", listOf(
+                                        EncounterInGame("gift", null, 30, 10, 10),
+                                        EncounterInGame("surf", null, 20, 20, 25),
+                                    )
+                                ),
+                                VersionDetails(
+                                    "blue", listOf(
+                                        EncounterInGame("old-rod", null, 50, 10, 10),
+                                        EncounterInGame("surf", null, 30, 20, 25),
+                                    )
+                                ),
+                                VersionDetails(
+                                    "silver", listOf(
+                                        EncounterInGame("super-rod", null, 50, 10, 10),
+                                        EncounterInGame("surf", null, 30, 20, 25),
+                                    )
+                                )
+                            )
+                        ),
+                    )
+                )
+            },
+            onTryAgainClick = {}
         )
     }
 }
 
 @Composable
-fun PokemonLocationsScreenContent(viewModel: LocationsLayoutViewModel) {
-    val locations = viewModel.pokemonLocations
+fun PokemonLocationsScreenContent(
+    viewModel: LocationsLayoutViewModel,
+    onTryAgainClick: () -> Unit
+) {
+    MainLayout(
+        isLoading = viewModel.loading,
+        error = viewModel.error,
+        onTryAgainClick = onTryAgainClick
+    ) {
+        Content(viewModel)
+    }
+}
 
-    ConstraintLayout(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)
-        .verticalScroll(rememberScrollState())
+@Composable
+private fun Content(viewModel: LocationsLayoutViewModel) {
+    val locations = viewModel.locationData?.locations.orEmpty()
+
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         val (titleRef, listRef) = createRefs()
 
@@ -135,7 +174,8 @@ fun PokemonLocationsScreenContent(viewModel: LocationsLayoutViewModel) {
                                     val (methodRef, lvRef) = createRefs()
 
                                     Text(
-                                        text = " • " + encounter.method?.capitalizeWords().orEmpty(),
+                                        text = " • " + encounter.method?.capitalizeWords()
+                                            .orEmpty(),
                                         style = AppTypography.bodyMedium,
                                         modifier = Modifier.constrainAs(methodRef) {
                                             top.linkTo(parent.top)
@@ -146,7 +186,10 @@ fun PokemonLocationsScreenContent(viewModel: LocationsLayoutViewModel) {
                                     )
 
                                     Text(
-                                        text = encounter.chance?.toString().orEmpty() + "% chance of finding LV " + PokemonHelper.mergePokemonEncounterLevel(encounter) + ".",
+                                        text = encounter.chance?.toString()
+                                            .orEmpty() + "% chance of finding LV " + PokemonHelper.mergePokemonEncounterLevel(
+                                            encounter
+                                        ) + ".",
                                         style = AppTypography.bodySmall,
                                         modifier = Modifier.constrainAs(lvRef) {
                                             top.linkTo(methodRef.bottom, 4.dp)

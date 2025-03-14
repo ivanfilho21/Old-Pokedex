@@ -14,5 +14,6 @@ class PokemonUseCase @Inject constructor(
 
     suspend fun findById(id: Int) = pokemonRepository.getDetails(id)
 
-    suspend fun findAllLocationsByPokemonId(id: Int) = locationRepository.findByPokemonId(id)
+    suspend fun findAllLocationsByPokemonId(id: Int) =
+        locationRepository.findByPokemonId(id)
 }

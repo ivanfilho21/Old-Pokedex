@@ -10,6 +10,7 @@ class PokemonService @Inject constructor() {
         private const val BASE_URL = "https://pokeapi.co/api/v2/pokemon"
         private const val GET_POKEMON_ENDPOINT = "$BASE_URL/%d"
         private const val GET_SPECIES_DETAILS_ENDPOINT = "$BASE_URL-species/%d"
+        private const val GET_ENCOUNTERS_ENDPOINT = "$BASE_URL/%d/encounters"
     }
 
     fun getPokemonList(limit: Int): ApiRequestResult {
@@ -35,4 +36,11 @@ class PokemonService @Inject constructor() {
             .build()
             .sendRequest()
     }
+
+    fun getEncountersDetails(pokemonId: Int) =
+        MyHttpClient.Builder()
+            .setUrl(GET_ENCOUNTERS_ENDPOINT.format(pokemonId))
+            .setRequestType(HttpRequestType.GET)
+            .build()
+            .sendRequest()
 }
