@@ -15,10 +15,4 @@ object PokemonSpeciesResponse {
         val language: NameUrlObject? = null,
         val version: NameUrlObject? = null
     )
-
-    @Serializable
-    data class NameUrlObject(
-        val name: String? = null,
-        val url: String? = null
-    )
 }

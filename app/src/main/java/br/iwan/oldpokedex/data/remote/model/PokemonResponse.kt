@@ -13,8 +13,5 @@ object PokemonResponse {
     )
 
     @Serializable
-    data class PokemonType(val type: Type? = null)
-
-    @Serializable
-    data class Type(val name: String? = null)
+    data class PokemonType(val type: NameUrlObject? = null)
 }
