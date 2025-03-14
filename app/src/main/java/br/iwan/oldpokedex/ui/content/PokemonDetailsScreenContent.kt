@@ -40,6 +40,7 @@ import br.iwan.oldpokedex.ui.theme.AppTypography
 import br.iwan.oldpokedex.ui.theme.backgroundColor
 import br.iwan.oldpokedex.ui.view_model.DetailsLayoutViewModel
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import kotlinx.coroutines.delay
 import java.util.UUID
@@ -263,10 +264,13 @@ private fun Content(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) 
         )
 
         val context = LocalContext.current
+        val id = pokemonData?.id
 
         AsyncImage(
             model = ImageRequest.Builder(context)
-                .data("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemonData?.id.toString()}.png")
+                .data("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png")
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .memoryCachePolicy(CachePolicy.ENABLED)
                 .crossfade(true)
                 .build(),
             contentDescription = null,
