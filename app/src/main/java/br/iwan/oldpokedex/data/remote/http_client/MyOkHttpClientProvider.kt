@@ -1,6 +1,7 @@
 package br.iwan.oldpokedex.data.remote.http_client
 
 import android.util.Log
+import br.iwan.oldpokedex.BuildConfig
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
@@ -27,15 +28,17 @@ object MyOkHttpClientProvider {
                 }
 
                 chain.proceed(chain.request()).also { res ->
-                    Log.d(
-                        TAG,
-                        "-----------------------------------------------" +
-                                "\n   Http Request\n\tURL: $url" +
-                                "\n   Method: $method" +
-                                "\n   Response:" +
-                                "\n   ${res.peekBody(Long.MAX_VALUE).string()}" +
-                                "\n-----------------------------------------------"
-                    )
+                    if (BuildConfig.DEBUG) {
+                        Log.d(
+                            TAG,
+                            "-----------------------------------------------" +
+                                    "\n   Http Request\n\tURL: $url" +
+                                    "\n   Method: $method" +
+                                    "\n   Response:" +
+                                    "\n   ${res.peekBody(Long.MAX_VALUE).string()}" +
+                                    "\n-----------------------------------------------"
+                        )
+                    }
                 }
             }
             .retryOnConnectionFailure(true)
