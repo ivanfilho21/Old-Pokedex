@@ -33,6 +33,8 @@ private fun Preview() {
     DefaultPreview {
         PokemonLocationsScreenContent(
             viewModel = viewModel<LocationsLayoutViewModel>().apply {
+                pokemonName = "Pokémon"
+
                 locationData = PokemonLocationEntity(
                     UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
                     0,
@@ -118,7 +120,7 @@ private fun Content(viewModel: LocationsLayoutViewModel) {
         val (titleRef, listRef) = createRefs()
 
         Text(
-            text = "Encounters locations in games for $",
+            text = "Encounters locations in games for ${viewModel.pokemonName}",
             style = AppTypography.titleLarge,
             modifier = Modifier.constrainAs(titleRef) {
                 top.linkTo(parent.top, 16.dp)

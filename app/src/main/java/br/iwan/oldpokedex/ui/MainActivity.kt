@@ -142,7 +142,10 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
                 locationsLVM.loading = false
 
                 if (it is UiResponse.Success)
-                    locationsLVM.locationData = it.data
+                    locationsLVM.run {
+                        locationData = it.data
+                        pokemonName = detailsLVM.pokemonData?.name
+                    }
 
                 if (it is UiResponse.Error)
                     locationsLVM.error = it.message
@@ -151,9 +154,12 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     }
 
     private fun listPokemon() {
-        if (homeLVM.pokemonList.isEmpty()) {
-            homeLVM.loading = true
-            homeVM.listAllPokemon()
+        homeLVM.run {
+            if (pokemonList.isEmpty()) {
+                loading = true
+                error = null
+                homeVM.listAllPokemon()
+            }
         }
     }
 
@@ -162,6 +168,7 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
             currentId?.let { id ->
                 if (pokemonData?.id != id) {
                     loading = true
+                    error = null
                     detailsVM.getDetails(id)
                 }
             }
@@ -173,6 +180,7 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
             currentId?.let { id ->
                 if (locationData?.pokemonId != id) {
                     loading = true
+                    error = null
                     locationsVM.getLocationsByPokemonId(id)
                 }
             }
