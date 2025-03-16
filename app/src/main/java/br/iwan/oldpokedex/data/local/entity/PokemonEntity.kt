@@ -14,5 +14,6 @@ data class PokemonEntity(
     @ColumnInfo var type1: String? = null,
     @ColumnInfo var type2: String? = null,
     @ColumnInfo var height: Int? = null,
-    @ColumnInfo var weight: Int? = null
+    @ColumnInfo var weight: Int? = null,
+    @ColumnInfo var stats: List<Stat>? = null
 )

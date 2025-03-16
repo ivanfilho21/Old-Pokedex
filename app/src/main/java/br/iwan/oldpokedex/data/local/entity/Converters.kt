@@ -11,4 +11,10 @@ class Converters {
 
     @TypeConverter
     fun toLocationList(data: String): List<Location> = Json.decodeFromString(data)
+
+    @TypeConverter
+    fun fromStatList(list: List<Stat>): String = Json.encodeToString(list)
+
+    @TypeConverter
+    fun toStatList(data: String): List<Stat> = Json.decodeFromString(data)
 }

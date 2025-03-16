@@ -10,5 +10,6 @@ class LocationsLayoutViewModel : ViewModel() {
     var currentId: Int? = null
     var loading by mutableStateOf(false)
     var error by mutableStateOf<String?>(null)
+    var pokemonName by mutableStateOf<String?>(null)
     var locationData by mutableStateOf<PokemonLocationEntity?>(null)
 }

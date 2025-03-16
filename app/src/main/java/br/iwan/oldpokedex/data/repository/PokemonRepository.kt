@@ -2,6 +2,7 @@ package br.iwan.oldpokedex.data.repository
 
 import br.iwan.oldpokedex.data.local.dao.PokemonDao
 import br.iwan.oldpokedex.data.local.entity.PokemonEntity
+import br.iwan.oldpokedex.data.local.entity.Stat
 import br.iwan.oldpokedex.data.model.UiResponse
 import br.iwan.oldpokedex.data.remote.PokemonService
 import br.iwan.oldpokedex.data.remote.model.ApiRequestResult
@@ -76,7 +77,9 @@ class PokemonRepository @Inject constructor(
             when (res) {
                 is ApiRequestResult.Success -> json.decodeFromString<PokemonResponse.Data>(res.data)
                     .let { remotePokemon ->
-                        val pokeTypes = remotePokemon.types?.mapNotNull { it.type?.name }.orEmpty()
+                        val pokeTypes = remotePokemon.types?.mapNotNull {
+                            it.type?.name
+                        }.orEmpty()
                         val firstType = pokeTypes.firstOrNull()
                         val secondType = pokeTypes.lastOrNull().let { if (it == firstType) null else it }
 
@@ -85,6 +88,9 @@ class PokemonRepository @Inject constructor(
                             type2 = secondType
                             height = remotePokemon.height
                             weight = remotePokemon.weight
+                            stats = remotePokemon.stats?.map {
+                                Stat(it.stat?.name, it.baseStat)
+                            }.orEmpty()
                         }.let {
                             update(it)
                             getSpeciesDetailsFromRemote(it)

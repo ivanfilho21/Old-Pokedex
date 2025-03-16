@@ -3,12 +3,17 @@ package br.iwan.oldpokedex.ui.content
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -35,10 +40,13 @@ import androidx.constraintlayout.compose.atLeast
 import androidx.constraintlayout.compose.atMost
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.iwan.oldpokedex.data.local.entity.PokemonEntity
+import br.iwan.oldpokedex.data.local.entity.Stat
 import br.iwan.oldpokedex.ui.helper.ColorHelper
+import br.iwan.oldpokedex.ui.helper.PokemonHelper.capitalizeWords
 import br.iwan.oldpokedex.ui.theme.AppTypography
 import br.iwan.oldpokedex.ui.theme.backgroundColor
 import br.iwan.oldpokedex.ui.view_model.DetailsLayoutViewModel
+import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
@@ -59,7 +67,15 @@ private fun Preview() {
                     "water",
                     "dragon",
                     7,
-                    69
+                    69,
+                    listOf(
+                        Stat("hp", 90),
+                        Stat("attack", 25),
+                        Stat("defense", 30),
+                        Stat("speed", 63),
+                        Stat("special-attack", 45),
+                        Stat("special-defense", 45),
+                    )
                 )
             },
             seeLocationsClick = {},
@@ -101,7 +117,7 @@ private fun Content(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) 
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        val (idRef, imgRef, mainContentRef, emptyBottomRef) = createRefs()
+        val (idRef, imgRef, mainContentRef, emptyBottomRef, locationRef) = createRefs()
         val mainContentBgColor = Color(0xDDF5F5F5)
         val bgRadius = 32.dp
 
@@ -117,7 +133,7 @@ private fun Content(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) 
                     width = Dimension.fillToConstraints
                 }
         ) {
-            val (nameRef, descRef, typesRef, aboutRef, statsRef, locationRef) = createRefs()
+            val (nameRef, descRef, typesRef, aboutRef, statsRef) = createRefs()
             val mainContentGuidelineStart = createGuidelineFromStart(16.dp)
             val mainContentGuidelineEnd = createGuidelineFromEnd(16.dp)
 
@@ -126,7 +142,7 @@ private fun Content(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) 
                 style = AppTypography.headlineMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.constrainAs(nameRef) {
-                    top.linkTo(parent.top, 64.dp)
+                    top.linkTo(parent.top, 72.dp)
                     start.linkTo(mainContentGuidelineStart)
                     end.linkTo(mainContentGuidelineEnd)
                     width = Dimension.fillToConstraints
@@ -217,45 +233,20 @@ private fun Content(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) 
             )
 
             StatsLayout(
+                stats = pokemonData?.stats,
+                mainColor = ColorHelper.getColorByPokemonType(pokemonData?.type1),
                 modifier = Modifier.constrainAs(statsRef) {
                     top.linkTo(descRef.bottom, 16.dp)
+                    bottom.linkTo(parent.bottom)
                     centerHorizontallyTo(descRef)
                     width = Dimension.fillToConstraints
                 }
             )
-
-            var btnEnabled by remember {
-                mutableStateOf(true)
-            }
-
-            LaunchedEffect(btnEnabled) {
-                if (btnEnabled) return@LaunchedEffect
-                delay(500L)
-                btnEnabled = true
-            }
-
-            Button(
-                enabled = btnEnabled,
-                onClick = {
-                    btnEnabled = false
-                    seeLocationsClick(pokemonData?.id ?: 0)
-                },
-                colors = ButtonDefaults.buttonColors().copy(
-                    containerColor = ColorHelper.getColorByPokemonType(pokemonData?.type1)
-                ),
-                modifier = Modifier.constrainAs(locationRef) {
-                    top.linkTo(statsRef.bottom, 24.dp)
-                    centerHorizontallyTo(statsRef)
-                    width = Dimension.fillToConstraints
-                }
-            ) {
-                Text(text = "See locations")
-            }
         }
 
         Text(
             "# ${pokemonData?.id}",
-            style = AppTypography.headlineSmall,
+            style = AppTypography.titleSmall,
             color = Color(0xFFF5F5F5),
             modifier = Modifier.constrainAs(idRef) {
                 top.linkTo(parent.top, 16.dp)
@@ -266,13 +257,22 @@ private fun Content(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) 
         val context = LocalContext.current
         val id = pokemonData?.id
 
+        val loader = ImageLoader.Builder(context)
+            .respectCacheHeaders(false)
+            .diskCachePolicy(CachePolicy.ENABLED)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .networkCachePolicy(CachePolicy.ENABLED)
+            .build()
+
         AsyncImage(
             model = ImageRequest.Builder(context)
                 .data("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png")
+                .crossfade(true)
+                .networkCachePolicy(CachePolicy.ENABLED)
                 .diskCachePolicy(CachePolicy.ENABLED)
                 .memoryCachePolicy(CachePolicy.ENABLED)
-                .crossfade(true)
                 .build(),
+            imageLoader = loader,
             contentDescription = null,
             alignment = Alignment.Center,
             contentScale = ContentScale.Fit,
@@ -301,6 +301,41 @@ private fun Content(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) 
                     }
                 }
         )
+
+        var btnEnabled by remember {
+            mutableStateOf(true)
+        }
+
+        LaunchedEffect(btnEnabled) {
+            if (btnEnabled) return@LaunchedEffect
+            delay(500L)
+            btnEnabled = true
+        }
+
+        Button(
+            enabled = btnEnabled,
+            onClick = {
+                btnEnabled = false
+                seeLocationsClick(pokemonData?.id ?: 0)
+            },
+            colors = ButtonDefaults.buttonColors().copy(
+                containerColor = ColorHelper.getColorByPokemonType(pokemonData?.type1)
+            ),
+            modifier = Modifier.constrainAs(locationRef) {
+                linkTo(
+                    top = emptyBottomRef.top,
+                    bottom = emptyBottomRef.bottom,
+                    topMargin = 24.dp,
+                    bottomMargin = 16.dp,
+                    bias = 1f
+                )
+                start.linkTo(emptyBottomRef.start, 16.dp)
+                end.linkTo(emptyBottomRef.end, 16.dp)
+                width = Dimension.fillToConstraints
+            }
+        ) {
+            Text(text = "See locations")
+        }
     }
 }
 
@@ -341,7 +376,7 @@ private fun InfoLayout(info: String, label: String, modifier: Modifier) {
             style = AppTypography.bodySmall,
             textAlign = TextAlign.Center,
             modifier = Modifier.constrainAs(labelRef) {
-                top.linkTo(infoRef.bottom, 8.dp)
+                top.linkTo(infoRef.bottom, 4.dp)
                 centerHorizontallyTo(infoRef)
                 width = Dimension.fillToConstraints
             }
@@ -350,6 +385,85 @@ private fun InfoLayout(info: String, label: String, modifier: Modifier) {
 }
 
 @Composable
-private fun StatsLayout(modifier: Modifier) {
-    Box(modifier = modifier)
+private fun StatsLayout(stats: List<Stat>?, mainColor: Color, modifier: Modifier) {
+    ConstraintLayout(modifier = modifier) {
+        val (titleRef, listRef) = createRefs()
+
+        Text(
+            text = "Base stats",
+            style = AppTypography.titleMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.constrainAs(titleRef) {
+                top.linkTo(parent.top, 16.dp)
+                centerHorizontallyTo(parent)
+                width = Dimension.fillToConstraints
+            }
+        )
+
+        LazyColumn(
+            userScrollEnabled = false,
+            modifier = Modifier
+                .heightIn(max = 5_000.dp)
+                .constrainAs(listRef) {
+                    top.linkTo(titleRef.bottom, 16.dp)
+                    centerHorizontallyTo(titleRef)
+                    width = Dimension.fillToConstraints
+                }
+        ) {
+            items(items = stats.orEmpty()) {
+                val name = when (it.name) {
+                    "special-attack" -> "sp.-atk"
+                    "special-defense" -> "sp.-def"
+                    else -> it.name
+                }
+                StatItem(name.orEmpty(), it.value, mainColor, Modifier.fillMaxWidth())
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatItem(name: String, value: Int?, color: Color, modifier: Modifier) {
+    ConstraintLayout(modifier = modifier) {
+        val (nameRef, valueRef, progressRef) = createRefs()
+        val statsNameGuideline = createGuidelineFromStart(0.2f)
+
+        Text(
+            text = name.let { if (it.length > 2) it.capitalizeWords() else it.uppercase() },
+            style = AppTypography.titleSmall.copy(
+                color = color,
+                textAlign = TextAlign.End
+            ),
+            modifier = Modifier.constrainAs(nameRef) {
+                top.linkTo(parent.top)
+                start.linkTo(parent.start)
+                end.linkTo(statsNameGuideline)
+                width = Dimension.fillToConstraints
+            }
+        )
+
+        Text(
+            text = value?.toString().orEmpty().padStart(3, '0'),
+            style = AppTypography.bodyMedium,
+            modifier = Modifier.constrainAs(valueRef) {
+                centerVerticallyTo(nameRef)
+                start.linkTo(nameRef.end, 16.dp)
+                end.linkTo(progressRef.start)
+                width = Dimension.wrapContent
+            }
+        )
+
+        LinearProgressIndicator(
+            progress = { (value?.toFloat()?.div(100f)) ?: 0f },
+            color = color,
+            trackColor = Color(0xFFa5a5a5),
+            drawStopIndicator = {},
+            modifier = Modifier.constrainAs(progressRef) {
+                centerVerticallyTo(valueRef)
+                start.linkTo(valueRef.end, 16.dp)
+                end.linkTo(parent.end)
+                width = Dimension.fillToConstraints
+            }
+        )
+    }
 }
