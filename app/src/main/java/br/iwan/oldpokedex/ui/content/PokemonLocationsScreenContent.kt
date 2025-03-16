@@ -151,58 +151,18 @@ private fun Content(viewModel: LocationsLayoutViewModel) {
                     modifier = Modifier.fillParentMaxWidth()
                 )
 
-                LazyColumn(
-                    userScrollEnabled = false,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
-                        .fillParentMaxWidth()
-                        .heightIn(max = 1_000.dp)
-                ) {
-                    items(items = region.versions.orEmpty()) { game ->
-                        Text(
-                            text = game.version?.capitalizeWords().orEmpty(),
-                            style = AppTypography.titleSmall,
-                            modifier = Modifier.fillParentMaxWidth()
-                        )
+                PokemonHelper.mergeEncountersInAreaByVersion(region).forEach { (encounter, versions) ->
+                    Text(
+                        text = versions.joinToString { it.capitalizeWords() },
+                        style = AppTypography.titleSmall,
+                        modifier = Modifier.fillParentMaxWidth()
+                    )
 
-                        LazyColumn(
-                            userScrollEnabled = false,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier
-                                .fillParentMaxWidth()
-                                .heightIn(max = 1_000.dp)
-                        ) {
-                            items(items = game.encounters.orEmpty()) { encounter ->
-                                ConstraintLayout(modifier = Modifier.fillParentMaxWidth()) {
-                                    val (methodRef, lvRef) = createRefs()
-
-                                    Text(
-                                        text = " • " + encounter.method?.capitalizeWords()
-                                            .orEmpty(),
-                                        style = AppTypography.bodyMedium,
-                                        modifier = Modifier.constrainAs(methodRef) {
-                                            top.linkTo(parent.top)
-                                            start.linkTo(parent.start, 8.dp)
-                                            end.linkTo(parent.end)
-                                            width = Dimension.fillToConstraints
-                                        }
-                                    )
-
-                                    Text(
-                                        text = PokemonHelper.getEncounterText(encounter),
-                                        style = AppTypography.bodySmall,
-                                        modifier = Modifier.constrainAs(lvRef) {
-                                            top.linkTo(methodRef.bottom, 4.dp)
-                                            bottom.linkTo(parent.bottom)
-                                            start.linkTo(methodRef.start, 12.dp)
-                                            end.linkTo(methodRef.end)
-                                            width = Dimension.fillToConstraints
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    Text(
+                        text = " • " + encounter.method?.capitalizeWords().orEmpty() + ": " + PokemonHelper.getEncounterText(encounter),
+                        style = AppTypography.bodyMedium,
+                        modifier = Modifier.fillParentMaxWidth()
+                    )
                 }
             }
         }
