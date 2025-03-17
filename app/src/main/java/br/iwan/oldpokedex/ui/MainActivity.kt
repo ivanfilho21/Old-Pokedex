@@ -1,5 +1,6 @@
 package br.iwan.oldpokedex.ui
 
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -22,11 +25,13 @@ import br.iwan.oldpokedex.data.model.UiResponse
 import br.iwan.oldpokedex.ui.content.HomeScreenContent
 import br.iwan.oldpokedex.ui.content.PokemonDetailsScreenContent
 import br.iwan.oldpokedex.ui.content.PokemonLocationsScreenContent
+import br.iwan.oldpokedex.ui.helper.ColorHelper
 import br.iwan.oldpokedex.ui.navigation.HomeScreen
 import br.iwan.oldpokedex.ui.navigation.PokemonDetailsScreen
 import br.iwan.oldpokedex.ui.navigation.PokemonLocationsScreen
 import br.iwan.oldpokedex.ui.theme.PokeDexTheme
-import br.iwan.oldpokedex.ui.theme.backgroundColor
+import br.iwan.oldpokedex.ui.theme.primaryColor
+import br.iwan.oldpokedex.ui.theme.primaryColorDark
 import br.iwan.oldpokedex.ui.view_model.DetailsLayoutViewModel
 import br.iwan.oldpokedex.ui.view_model.DetailsViewModel
 import br.iwan.oldpokedex.ui.view_model.HomeLayoutViewModel
@@ -71,30 +76,47 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         destination: NavDestination,
         arguments: Bundle?
     ) {
+        supportActionBar?.show()
+
         destination.route?.let {
             when {
-                it has HomeScreen -> listPokemon()
+                it has HomeScreen -> {
+                    listPokemon()
+                    supportActionBar?.title = "Pokédex"
+                    changeAppBarColor(primaryColor, primaryColorDark)
+                }
 
                 it has PokemonDetailsScreen -> {
                     detailsLVM.currentId = arguments?.getInt("id")
                     getPokemonDetails()
+                    supportActionBar?.hide()
                 }
 
                 it has PokemonLocationsScreen -> {
                     locationsLVM.currentId = arguments?.getInt("id")
                     getPokemonLocations()
+                    supportActionBar?.title = "Locations"
                 }
 
                 else -> {
-                    // nothing yet
+                    // empty
                 }
             }
         }
     }
 
+    private fun changeAppBarColor(actionBarColor: Color, statusBarColor: Color? = null) {
+        val secondColor = statusBarColor ?: actionBarColor
+
+        supportActionBar?.setBackgroundDrawable(
+            ColorDrawable(actionBarColor.toArgb())
+        )
+
+        window.statusBarColor = secondColor.toArgb()
+    }
+
     private fun observers() {
         observePokemonList()
-        observeSuggestions()
         observePokemonDetails()
         observePokemonLocations()
     }
@@ -113,22 +135,17 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         }
     }
 
-    private fun observeSuggestions() {
-        lifecycleScope.launch {
-            homeVM.suggestionsSF.collect {
-                if (it is UiResponse.Success)
-                    homeLVM.updateSuggestions(it.data)
-            }
-        }
-    }
-
     private fun observePokemonDetails() {
         lifecycleScope.launch {
             detailsVM.pokemonDataSF.collect {
                 detailsLVM.loading = false
 
-                if (it is UiResponse.Success)
+                if (it is UiResponse.Success) {
                     detailsLVM.pokemonData = it.data
+                    changeAppBarColor(
+                        ColorHelper.getColorByPokemonType(detailsLVM.pokemonData?.type1)
+                    )
+                }
 
                 if (it is UiResponse.Error)
                     detailsLVM.error = it.message
@@ -207,7 +224,6 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     @Composable
     private fun ScreenContent() {
         Scaffold(
-            containerColor = backgroundColor,
             content = {
                 Navigation(innerPadding = it)
             }
@@ -224,9 +240,6 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
                 composable<HomeScreen> {
                     HomeScreenContent(
                         viewModel = homeLVM,
-                        onSearch = { name ->
-                            homeVM.searchByName(name)
-                        },
                         onPokemonClick = { pokemon ->
                             detailsLVM.currentId = pokemon
                             navController.navigate(PokemonDetailsScreen(id = pokemon))

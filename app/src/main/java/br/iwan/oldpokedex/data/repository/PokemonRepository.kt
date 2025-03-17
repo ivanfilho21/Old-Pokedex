@@ -55,16 +55,9 @@ class PokemonRepository @Inject constructor(
             }
         }
 
-    suspend fun searchByName(name: String): List<PokemonEntity> {
-        return withContext(ioDispatcher) {
-            pokemonDao.searchByName(name)
-        }
-    }
-
     suspend fun getDetails(id: Int): UiResponse<PokemonEntity> {
         return withContext(ioDispatcher) {
             pokemonDao.findById(id).let { pokemon ->
-                //pokemon.type1?.let {
                 pokemon.description?.let {
                     UiResponse.Success(pokemon)
                 } ?: getDetailsFromRemote(pokemon)

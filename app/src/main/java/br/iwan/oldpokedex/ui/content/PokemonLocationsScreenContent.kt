@@ -23,6 +23,7 @@ import br.iwan.oldpokedex.data.model.Location
 import br.iwan.oldpokedex.data.model.VersionDetails
 import br.iwan.oldpokedex.ui.helper.PokemonHelper
 import br.iwan.oldpokedex.ui.helper.PokemonHelper.capitalizeWords
+import br.iwan.oldpokedex.ui.helper.PokemonHelper.formatPokemonName
 import br.iwan.oldpokedex.ui.theme.AppTypography
 import br.iwan.oldpokedex.ui.view_model.LocationsLayoutViewModel
 import java.util.UUID
@@ -120,7 +121,7 @@ private fun Content(viewModel: LocationsLayoutViewModel) {
         val (titleRef, listRef) = createRefs()
 
         Text(
-            text = "Encounters locations in games for ${viewModel.pokemonName}",
+            text = "Encounters locations in games for ${viewModel.pokemonName?.formatPokemonName()}",
             style = AppTypography.titleLarge,
             modifier = Modifier.constrainAs(titleRef) {
                 top.linkTo(parent.top, 16.dp)

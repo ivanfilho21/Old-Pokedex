@@ -20,6 +20,9 @@ object PokemonHelper {
             it.replaceFirstChar { c -> c.uppercaseChar() }
         }
 
+    fun String.formatPokemonName() =
+        this.replace("-f", "♀").replace("-m", "♂").capitalizeWords()
+
     fun getEncounterText(encounter: EncounterInGame): String = encounter.run {
         if (chance == 100) {
             return "LV " + mergePokemonEncounterLevel(this)

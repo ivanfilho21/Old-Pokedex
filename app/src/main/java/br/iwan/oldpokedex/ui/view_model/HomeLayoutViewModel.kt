@@ -10,31 +10,25 @@ import br.iwan.oldpokedex.data.local.entity.PokemonEntity
 class HomeLayoutViewModel : ViewModel() {
     var error by mutableStateOf<String?>(null)
     var loading by mutableStateOf(false)
-    var searchBarExpanded by mutableStateOf(false)
     var searchBarQuery by mutableStateOf("")
-    val suggestions = mutableStateListOf<String>()
+    private val originalPokemonList = mutableStateListOf<PokemonEntity>()
     val pokemonList = mutableStateListOf<PokemonEntity>()
 
-    fun updateSuggestions(list: List<String>) {
-        suggestions.run {
+    fun updatePokemonList(list: List<PokemonEntity>) {
+        originalPokemonList.run {
             clear()
             addAll(list)
         }
     }
 
-    fun updatePokemonList(list: List<PokemonEntity>) {
+    fun updateFilter() {
         pokemonList.run {
             clear()
-            addAll(list)
+            addAll(
+                originalPokemonList.filter {
+                    it.name?.contains(searchBarQuery, true) == true
+                }
+            )
         }
-    }
-
-    fun clearSuggestions() {
-        suggestions.clear()
-    }
-
-    fun onSearchBarAction(id: Int, navigationAction: (Int) -> Unit) {
-        clearSuggestions()
-        navigationAction(id)
     }
 }

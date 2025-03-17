@@ -47,6 +47,7 @@ import br.iwan.oldpokedex.data.local.entity.PokemonEntity
 import br.iwan.oldpokedex.data.local.entity.Stat
 import br.iwan.oldpokedex.ui.helper.ColorHelper
 import br.iwan.oldpokedex.ui.helper.PokemonHelper.capitalizeWords
+import br.iwan.oldpokedex.ui.helper.PokemonHelper.formatPokemonName
 import br.iwan.oldpokedex.ui.theme.AppTypography
 import br.iwan.oldpokedex.ui.theme.backgroundColor
 import br.iwan.oldpokedex.ui.view_model.DetailsLayoutViewModel
@@ -185,7 +186,7 @@ private fun Content(
             }
 
             Text(
-                text = pokemonData?.name?.capitalizeWords().orEmpty(),
+                text = pokemonData?.name?.formatPokemonName().orEmpty(),
                 style = AppTypography.headlineMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.constrainAs(nameRef) {
@@ -322,7 +323,7 @@ private fun Content(
             alignment = Alignment.Center,
             contentScale = ContentScale.Fit,
             modifier = Modifier.constrainAs(imgRef) {
-                top.linkTo(idRef.bottom)
+                top.linkTo(idRef.bottom, 72.dp)
                 centerHorizontallyTo(parent)
 
                 250.dp.asDimension().let {

@@ -3,7 +3,10 @@ package br.iwan.oldpokedex.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val backgroundColor = Color(0xFFF5F5F5)
-val textPrimaryColor = Color(0xFF333333)
+val primaryColor = Color(0xFFD32F2F)
+val primaryColorDark = Color(0xFFB71C1C)
+
+val gray50 = Color(0xFFC0392B)
 
 val amberA400 = Color(0xFFFFC400)
 val indigo400 = Color(0xFF5C6BC0)

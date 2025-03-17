@@ -6,7 +6,12 @@ import androidx.compose.runtime.Composable
 @Composable
 fun PokeDexTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = MaterialTheme.colorScheme,
+        colorScheme = MaterialTheme.colorScheme.copy(
+            primary = primaryColor,
+            primaryContainer = primaryColor,
+            surface = primaryColor,
+            background = backgroundColor
+        ),
         content = content
     )
 }
