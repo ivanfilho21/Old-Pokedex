@@ -24,6 +24,7 @@ import br.iwan.oldpokedex.data.model.VersionDetails
 import br.iwan.oldpokedex.ui.helper.PokemonHelper
 import br.iwan.oldpokedex.ui.helper.PokemonHelper.capitalizeWords
 import br.iwan.oldpokedex.ui.helper.PokemonHelper.formatPokemonName
+import br.iwan.oldpokedex.ui.helper.PokemonHelper.joinWithComma
 import br.iwan.oldpokedex.ui.theme.AppTypography
 import br.iwan.oldpokedex.ui.view_model.LocationsLayoutViewModel
 import java.util.UUID
@@ -154,7 +155,7 @@ private fun Content(viewModel: LocationsLayoutViewModel) {
 
                 PokemonHelper.mergeEncountersInAreaByVersion(region).forEach { (encounter, versions) ->
                     Text(
-                        text = versions.joinToString { it.capitalizeWords() },
+                        text = versions.joinWithComma { it.capitalizeWords() },
                         style = AppTypography.titleSmall,
                         modifier = Modifier.fillParentMaxWidth()
                     )

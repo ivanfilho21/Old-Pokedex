@@ -28,7 +28,25 @@ object PokemonHelper {
             return "LV " + mergePokemonEncounterLevel(this)
         }
 
-        return getChanceText(encounter) + " chance of finding it at LV " + mergePokemonEncounterLevel(encounter) + "."
+        return getChanceText(encounter) + " chance of finding it at LV " + mergePokemonEncounterLevel(
+            encounter
+        ) + "."
+    }
+
+    fun List<String>.joinWithComma(transform: ((String) -> String)): String {
+        val sb = StringBuilder()
+
+        this.forEachIndexed { i, text ->
+            sb.append(transform(text)).append(
+                when (i) {
+                    size - 1 -> ""
+                    size - 2 -> " and "
+                    else -> ", "
+                }
+            )
+        }
+
+        return sb.toString()
     }
 
     fun mergeEncountersInAreaByVersion(area: Location): Map<EncounterInGame, List<String>> {
