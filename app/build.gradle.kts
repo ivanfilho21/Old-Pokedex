@@ -75,6 +75,9 @@ dependencies {
     // Coil - Image handler
     implementation(libs.coil.compose)
 
+    // ExoPlayer
+    implementation(libs.androidx.media3.exoplayer)
+
     // Other libs
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

@@ -2,6 +2,7 @@ package br.iwan.oldpokedex.ui.content
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -11,8 +12,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -79,6 +83,7 @@ private fun Preview() {
                 )
             },
             seeLocationsClick = {},
+            playCryClick = {},
             onTryAgainClick = {}
         )
     }
@@ -88,6 +93,7 @@ private fun Preview() {
 fun PokemonDetailsScreenContent(
     viewModel: DetailsLayoutViewModel,
     seeLocationsClick: (Int) -> Unit,
+    playCryClick: (Int?) -> Unit,
     onTryAgainClick: () -> Unit
 ) {
     MainLayout(
@@ -95,13 +101,18 @@ fun PokemonDetailsScreenContent(
         error = viewModel.error,
         onTryAgainClick = onTryAgainClick
     ) {
-        Content(viewModel, seeLocationsClick)
+        Content(viewModel, seeLocationsClick, playCryClick)
     }
 }
 
 @Composable
-private fun Content(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) -> Unit) {
+private fun Content(
+    viewModel: DetailsLayoutViewModel,
+    seeLocationsClick: (Int) -> Unit,
+    playCryClick: (Int?) -> Unit
+) {
     val pokemonData = viewModel.pokemonData
+    val typeOneColor = ColorHelper.getColorByPokemonType(pokemonData?.type1)
 
     var bgColors by remember {
         mutableStateOf(ColorHelper.getColorListByPokemon(pokemonData))
@@ -133,12 +144,48 @@ private fun Content(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) 
                     width = Dimension.fillToConstraints
                 }
         ) {
-            val (nameRef, descRef, typesRef, aboutRef, statsRef) = createRefs()
+            val (cryRef, nameRef, descRef, typesRef, aboutRef, statsRef) = createRefs()
             val mainContentGuidelineStart = createGuidelineFromStart(16.dp)
             val mainContentGuidelineEnd = createGuidelineFromEnd(16.dp)
 
+            var cryBtnEnabled by remember {
+                mutableStateOf(true)
+            }
+
+            LaunchedEffect(cryBtnEnabled) {
+                if (cryBtnEnabled) return@LaunchedEffect
+                delay(1_000L)
+                cryBtnEnabled = true
+            }
+
+            Button(
+                enabled = cryBtnEnabled,
+                onClick = {
+                    cryBtnEnabled = false
+                    playCryClick(pokemonData?.id)
+                },
+                contentPadding = PaddingValues(horizontal = 8.dp),
+                colors = ButtonDefaults.buttonColors().copy(
+                    containerColor = typeOneColor
+                ),
+                modifier = Modifier.constrainAs(cryRef) {
+                    top.linkTo(parent.top, 8.dp)
+                    end.linkTo(parent.end, 8.dp)
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.PlayArrow,
+                    contentDescription = null
+                )
+
+                Text(
+                    text = "Cry",
+                    modifier = Modifier.padding(end = 4.dp)
+                )
+            }
+
             Text(
-                text = pokemonData?.name.orEmpty(),
+                text = pokemonData?.name?.capitalizeWords().orEmpty(),
                 style = AppTypography.headlineMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.constrainAs(nameRef) {
@@ -174,9 +221,7 @@ private fun Content(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) 
                 TypeLayout(
                     type = pokemonData?.type2,
                     modifier = Modifier.constrainAs(tp2) {
-                        visibility =
-                            if (hasSecondType) Visibility.Visible
-                            else Visibility.Gone
+                        visibility = getSecondTypeVisibility(hasSecondType)
                     }
                 )
 
@@ -234,7 +279,7 @@ private fun Content(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) 
 
             StatsLayout(
                 stats = pokemonData?.stats,
-                mainColor = ColorHelper.getColorByPokemonType(pokemonData?.type1),
+                mainColor = typeOneColor,
                 modifier = Modifier.constrainAs(statsRef) {
                     top.linkTo(descRef.bottom, 16.dp)
                     bottom.linkTo(parent.bottom)
@@ -319,7 +364,7 @@ private fun Content(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) 
                 seeLocationsClick(pokemonData?.id ?: 0)
             },
             colors = ButtonDefaults.buttonColors().copy(
-                containerColor = ColorHelper.getColorByPokemonType(pokemonData?.type1)
+                containerColor = typeOneColor
             ),
             modifier = Modifier.constrainAs(locationRef) {
                 linkTo(
@@ -339,10 +384,13 @@ private fun Content(viewModel: DetailsLayoutViewModel, seeLocationsClick: (Int) 
     }
 }
 
+private fun getSecondTypeVisibility(hasSecondType: Boolean) =
+    if (hasSecondType) Visibility.Visible else Visibility.Gone
+
 @Composable
 private fun TypeLayout(type: String?, modifier: Modifier) {
     Text(
-        text = type.orEmpty(),
+        text = type?.capitalizeWords().orEmpty(),
         style = AppTypography.bodyLarge.copy(
             color = backgroundColor
         ),

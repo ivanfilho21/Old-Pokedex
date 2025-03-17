@@ -241,6 +241,7 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
                         seeLocationsClick = { pokemon ->
                             navController.navigate(PokemonLocationsScreen(id = pokemon))
                         },
+                        playCryClick = detailsVM::playPokemonCry,
                         onTryAgainClick = ::getPokemonDetails
                     )
                 }
