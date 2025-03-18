@@ -2,6 +2,7 @@ package br.iwan.oldpokedex.ui
 
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +27,7 @@ import br.iwan.oldpokedex.ui.content.HomeScreenContent
 import br.iwan.oldpokedex.ui.content.PokemonDetailsScreenContent
 import br.iwan.oldpokedex.ui.content.PokemonLocationsScreenContent
 import br.iwan.oldpokedex.ui.helper.ColorHelper
+import br.iwan.oldpokedex.ui.helper.PokemonHelper.formatPokemonName
 import br.iwan.oldpokedex.ui.navigation.HomeScreen
 import br.iwan.oldpokedex.ui.navigation.PokemonDetailsScreen
 import br.iwan.oldpokedex.ui.navigation.PokemonLocationsScreen
@@ -76,26 +78,39 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         destination: NavDestination,
         arguments: Bundle?
     ) {
-        supportActionBar?.show()
+        supportActionBar?.run {
+            show()
+            setDisplayHomeAsUpEnabled(true)
+        }
 
         destination.route?.let {
             when {
                 it has HomeScreen -> {
                     listPokemon()
-                    supportActionBar?.title = "Pokédex"
+                    supportActionBar?.run {
+                        title = "Pokédex"
+                        setDisplayHomeAsUpEnabled(false)
+                    }
                     changeAppBarColor(primaryColor, primaryColorDark)
                 }
 
                 it has PokemonDetailsScreen -> {
                     detailsLVM.currentId = arguments?.getInt("id")
+
+                    supportActionBar?.title = homeLVM.pokemonList.find { p ->
+                        p.id == detailsLVM.currentId
+                    }?.name?.formatPokemonName().orEmpty()
+
                     getPokemonDetails()
-                    supportActionBar?.hide()
                 }
 
                 it has PokemonLocationsScreen -> {
                     locationsLVM.currentId = arguments?.getInt("id")
                     getPokemonLocations()
-                    supportActionBar?.title = "Locations"
+
+                    supportActionBar?.run {
+                        title = "Locations"
+                    }
                 }
 
                 else -> {
@@ -103,6 +118,13 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
                 }
             }
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return if (item.itemId == android.R.id.home) {
+            onBackPressedDispatcher.onBackPressed()
+            true
+        } else super.onOptionsItemSelected(item)
     }
 
     private fun changeAppBarColor(actionBarColor: Color, statusBarColor: Color? = null) {

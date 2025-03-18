@@ -96,6 +96,17 @@ private fun Preview() {
     }
 }
 
+@Preview
+@Composable
+private fun PreviewNoLocations() {
+    DefaultPreview {
+        PokemonLocationsScreenContent(
+            viewModel = viewModel(),
+            onTryAgainClick = {}
+        )
+    }
+}
+
 @Composable
 fun PokemonLocationsScreenContent(
     viewModel: LocationsLayoutViewModel,
@@ -113,6 +124,11 @@ fun PokemonLocationsScreenContent(
 @Composable
 private fun Content(viewModel: LocationsLayoutViewModel) {
     val locations = viewModel.locationData?.locations.orEmpty()
+
+    if (locations.isEmpty()) {
+        EmptyLocationContent()
+        return
+    }
 
     ConstraintLayout(
         modifier = Modifier
@@ -153,7 +169,7 @@ private fun Content(viewModel: LocationsLayoutViewModel) {
                     modifier = Modifier.fillParentMaxWidth()
                 )
 
-                PokemonHelper.mergeEncountersInAreaByVersion(region).forEach { (encounter, versions) ->
+                viewModel.mergeEncountersInAreaByVersion(region).forEach { (encounter, versions) ->
                     Text(
                         text = versions.joinWithComma { it.capitalizeWords() },
                         style = AppTypography.titleSmall,
@@ -168,5 +184,38 @@ private fun Content(viewModel: LocationsLayoutViewModel) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun EmptyLocationContent() {
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        val (titleRef) = createRefs()
+
+        Text(
+            text = "This Pokémon can't be found in any games.",
+            style = AppTypography.bodyLarge,
+            modifier = Modifier.constrainAs(titleRef) {
+                linkTo(
+                    top = parent.top,
+                    topMargin = 16.dp,
+                    bottom = parent.bottom,
+                    bottomMargin = 16.dp,
+                    start = parent.start,
+                    startMargin = 24.dp,
+                    end = parent.end,
+                    endMargin = 24.dp
+                )
+                
+                Dimension.fillToConstraints.let {
+                    width = it
+                    height = it
+                }
+            }
+        )
     }
 }
