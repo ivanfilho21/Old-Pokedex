@@ -27,7 +27,9 @@ class DetailsViewModel @Inject constructor(
 
     fun playPokemonCry(id: Int?) {
         id?.let {
-            AppPlayer.playSound("https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/$it.ogg")
+            AppPlayer.playSound(
+                "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/$it.ogg"
+            )
         }
     }
 
