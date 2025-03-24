@@ -6,11 +6,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import br.iwan.oldpokedex.data.local.entity.PokemonEntity
+import br.iwan.oldpokedex.ui.SortMode
 
 class HomeLayoutViewModel : ViewModel() {
     var error by mutableStateOf<String?>(null)
     var loading by mutableStateOf(false)
     var searchBarQuery by mutableStateOf("")
+    var currentSortingMode by mutableStateOf(SortMode.NUMBER)
     private val originalPokemonList = mutableStateListOf<PokemonEntity>()
     val pokemonList = mutableStateListOf<PokemonEntity>()
 
@@ -29,6 +31,22 @@ class HomeLayoutViewModel : ViewModel() {
                     it.name?.contains(searchBarQuery, true) == true
                 }
             )
+        }
+    }
+
+    fun toggleSortingOption() {
+        currentSortingMode = when (currentSortingMode) {
+            SortMode.NUMBER -> SortMode.NAME
+            SortMode.NAME -> SortMode.FAVORITE
+            SortMode.FAVORITE -> SortMode.NUMBER
+        }
+    }
+
+    fun updateSorting() {
+        when (currentSortingMode) {
+            SortMode.NUMBER -> pokemonList.sortBy { it.id }
+            SortMode.NAME -> pokemonList.sortBy { it.name }
+            SortMode.FAVORITE -> pokemonList // Sort by favorite in the future
         }
     }
 }

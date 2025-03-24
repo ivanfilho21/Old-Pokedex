@@ -22,12 +22,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
+import br.iwan.oldpokedex.R
 import br.iwan.oldpokedex.data.local.entity.PokemonEntity
+import br.iwan.oldpokedex.ui.SortMode
 import br.iwan.oldpokedex.ui.helper.PokemonHelper.formatPokemonName
 import br.iwan.oldpokedex.ui.theme.backgroundColor
 import br.iwan.oldpokedex.ui.view_model.HomeLayoutViewModel
@@ -101,8 +104,7 @@ fun HomeScreenContent(
 
 @Composable
 private fun SearchBarContent(
-    query: String,
-    onQueryChange: (String) -> Unit,
+    viewModel: HomeLayoutViewModel,
     modifier: Modifier
 ) {
     var suggestionItemsEnabled by remember {
@@ -115,11 +117,29 @@ private fun SearchBarContent(
         suggestionItemsEnabled = true
     }
 
+    var orderBtnEnabled by remember {
+        mutableStateOf(true)
+    }
+
+    LaunchedEffect(orderBtnEnabled) {
+        if (orderBtnEnabled) return@LaunchedEffect
+        delay(500L)
+        orderBtnEnabled = true
+    }
+
+    LaunchedEffect(viewModel.currentSortingMode) {
+        viewModel.updateSorting()
+    }
+
     DockedSearchBar(
         inputField = {
             SearchBarDefaults.InputField(
-                query = query,
-                onQueryChange = onQueryChange,
+                query = viewModel.searchBarQuery,
+                onQueryChange = { query ->
+                    if (viewModel.searchBarQuery != query) {
+                        viewModel.searchBarQuery = query
+                    }
+                },
                 onSearch = { _ ->
                     //
                 },
@@ -134,7 +154,19 @@ private fun SearchBarContent(
                         contentDescription = null
                     )
                 },
-                trailingIcon = {}
+                trailingIcon = {
+                    Icon(
+                        painter = getSortIcon(viewModel.currentSortingMode),
+                        contentDescription = "Ordering by favorite",
+                        modifier = Modifier.clickable(
+                            enabled = orderBtnEnabled,
+                            onClick = {
+                                orderBtnEnabled = false
+                                viewModel.toggleSortingOption()
+                            }
+                        )
+                    )
+                }
             )
         },
         expanded = false,
@@ -142,6 +174,15 @@ private fun SearchBarContent(
         modifier = modifier
     ) {}
 }
+
+@Composable
+private fun getSortIcon(sortMode: SortMode) = painterResource(
+    when (sortMode) {
+        SortMode.NUMBER -> R.drawable.baseline_numbers_24
+        SortMode.NAME -> R.drawable.baseline_sort_by_alpha_24
+        SortMode.FAVORITE -> R.drawable.baseline_favorite_24
+    }
+)
 
 @Composable
 private fun Content(
@@ -157,12 +198,7 @@ private fun Content(
         }
 
         SearchBarContent(
-            query = viewModel.searchBarQuery,
-            onQueryChange = { query ->
-                if (viewModel.searchBarQuery != query) {
-                    viewModel.searchBarQuery = query
-                }
-            },
+            viewModel = viewModel,
             modifier = Modifier.constrainAs(searchBarRef) {
                 top.linkTo(parent.top, 16.dp)
                 start.linkTo(parent.start, 16.dp)
