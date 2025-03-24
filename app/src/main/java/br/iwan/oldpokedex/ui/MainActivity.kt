@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
                 it has HomeScreen -> {
                     listPokemon()
                     supportActionBar?.run {
-                        title = "Pokédex"
+                        title = applicationInfo.loadLabel(packageManager)
                         setDisplayHomeAsUpEnabled(false)
                     }
                     changeAppBarColor(primaryColor, primaryColorDark)
