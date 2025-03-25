@@ -50,7 +50,7 @@ val previewList = listOf(
     "wartortle",
     "blastoise"
 ).mapIndexed { i, it ->
-    PokemonEntity(UUID.randomUUID(), i + 1, it)
+    PokemonEntity(uuid = UUID.randomUUID(), id =i + 1, name = it)
 }
 
 @Preview

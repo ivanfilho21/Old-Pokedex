@@ -36,10 +36,14 @@ class PokemonRepository @Inject constructor(
                 is ApiRequestResult.Success -> {
                     json.decodeFromString<PokemonListResponse>(res.data).results?.map {
                         PokemonEntity(
-                            UUID.randomUUID(),
-                            it.url?.split("pokemon/")?.lastOrNull()?.trim()?.trim('/')?.toInt()
+                            uuid = UUID.randomUUID(),
+                            id = it.url?.split("pokemon/")
+                                ?.lastOrNull()
+                                ?.trim()
+                                ?.trim('/')
+                                ?.toInt()
                                 ?: 0,
-                            it.name.orEmpty()
+                            name = it.name.orEmpty()
                         )
                     }.let { list ->
                         list?.let { l ->

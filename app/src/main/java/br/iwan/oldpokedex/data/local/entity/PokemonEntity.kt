@@ -9,6 +9,7 @@ import java.util.UUID
 data class PokemonEntity(
     @PrimaryKey val uuid: UUID,
     @ColumnInfo(name = "id") val id: Int = 0,
+    @ColumnInfo var favorite: Boolean = false,
     @ColumnInfo val name: String? = null,
     @ColumnInfo var description: String? = null,
     @ColumnInfo var type1: String? = null,
