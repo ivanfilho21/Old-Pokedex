@@ -46,7 +46,10 @@ class HomeLayoutViewModel : ViewModel() {
         when (currentSortingMode) {
             SortMode.NUMBER -> pokemonList.sortBy { it.id }
             SortMode.NAME -> pokemonList.sortBy { it.name }
-            SortMode.FAVORITE -> pokemonList.sortBy { it.favorite }
+            SortMode.FAVORITE ->
+                pokemonList.sortWith(
+                    compareByDescending<PokemonEntity> { it.favorite }.thenBy { it.id }
+                )
         }
     }
 }
