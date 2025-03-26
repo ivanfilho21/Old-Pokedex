@@ -21,6 +21,8 @@ class HomeLayoutViewModel : ViewModel() {
             clear()
             addAll(list)
         }
+
+        updateFilter()
     }
 
     fun updateFilter() {
@@ -32,6 +34,8 @@ class HomeLayoutViewModel : ViewModel() {
                 }
             )
         }
+
+        updateSorting()
     }
 
     fun toggleSortingOption() {

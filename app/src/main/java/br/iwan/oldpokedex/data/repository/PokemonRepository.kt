@@ -69,6 +69,14 @@ class PokemonRepository @Inject constructor(
         }
     }
 
+    suspend fun favorite(id: Int, favorite: Boolean) = withContext(ioDispatcher) {
+        pokemonDao.findById(id).apply {
+            this.favorite = favorite
+        }.let {
+            pokemonDao.update(it)
+        }
+    }
+
     private suspend fun getDetailsFromRemote(pokemon: PokemonEntity) =
         service.getPokemonDetails(pokemon.id).let { res ->
             when (res) {

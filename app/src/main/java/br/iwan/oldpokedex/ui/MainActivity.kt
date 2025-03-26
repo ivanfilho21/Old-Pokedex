@@ -266,6 +266,7 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
                             detailsLVM.currentId = pokemon
                             navController.navigate(PokemonDetailsScreen(id = pokemon))
                         },
+                        onFavoriteClick = homeVM::favoritePokemon,
                         onTryAgainClick = ::listPokemon
                     )
                 }
@@ -277,6 +278,7 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
                             navController.navigate(PokemonLocationsScreen(id = pokemon))
                         },
                         playCryClick = detailsVM::playPokemonCry,
+                        onFavoriteClick = homeVM::favoritePokemon,
                         onTryAgainClick = ::getPokemonDetails
                     )
                 }

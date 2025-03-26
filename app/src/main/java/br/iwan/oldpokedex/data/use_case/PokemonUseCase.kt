@@ -14,4 +14,7 @@ class PokemonUseCase @Inject constructor(
 
     suspend fun findAllLocationsByPokemonId(id: Int) =
         locationRepository.findByPokemonId(id)
+
+    suspend fun favoritePokemon(id: Int, favorite: Boolean) =
+        pokemonRepository.favorite(id, favorite)
 }

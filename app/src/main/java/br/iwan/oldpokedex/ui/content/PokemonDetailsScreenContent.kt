@@ -86,6 +86,7 @@ private fun Preview() {
             },
             seeLocationsClick = {},
             playCryClick = {},
+            onFavoriteClick = { _, _ -> },
             onTryAgainClick = {}
         )
     }
@@ -96,6 +97,7 @@ fun PokemonDetailsScreenContent(
     viewModel: DetailsLayoutViewModel,
     seeLocationsClick: (Int) -> Unit,
     playCryClick: (Int?) -> Unit,
+    onFavoriteClick: (Int, Boolean) -> Unit,
     onTryAgainClick: () -> Unit
 ) {
     MainLayout(
@@ -103,7 +105,7 @@ fun PokemonDetailsScreenContent(
         error = viewModel.error,
         onTryAgainClick = onTryAgainClick
     ) {
-        Content(viewModel, seeLocationsClick, playCryClick)
+        Content(viewModel, seeLocationsClick, playCryClick, onFavoriteClick)
     }
 }
 
@@ -111,7 +113,8 @@ fun PokemonDetailsScreenContent(
 private fun Content(
     viewModel: DetailsLayoutViewModel,
     seeLocationsClick: (Int) -> Unit,
-    playCryClick: (Int?) -> Unit
+    playCryClick: (Int?) -> Unit,
+    onFavoriteClick: (Int, Boolean) -> Unit
 ) {
     val pokemonData = viewModel.pokemonData
     val typeOneColor = ColorHelper.getColorByPokemonType(pokemonData?.type1)
@@ -146,10 +149,10 @@ private fun Content(
                     width = Dimension.fillToConstraints
                 }
         ) {
-            val (cryRef, nameRef, descRef, typesRef, aboutRef, statsRef) = createRefs()
+            val (favRef, cryRef, nameRef, descRef, typesRef, aboutRef, statsRef) = createRefs()
             val mainContentGuidelineStart = createGuidelineFromStart(16.dp)
             val mainContentGuidelineEnd = createGuidelineFromEnd(16.dp)
-
+            
             var cryBtnEnabled by remember {
                 mutableStateOf(true)
             }
@@ -186,13 +189,23 @@ private fun Content(
                 )
             }
 
+            ButtonFavoritePokemon(
+                pokemon = pokemonData,
+                onClick = onFavoriteClick,
+                modifier = Modifier.constrainAs(favRef) {
+                    centerVerticallyTo(nameRef)
+                    start.linkTo(mainContentGuidelineStart)
+                    end.linkTo(nameRef.start, 8.dp)
+                }
+            )
+
             Text(
                 text = pokemonData?.name?.formatPokemonName().orEmpty(),
                 style = AppTypography.headlineMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.constrainAs(nameRef) {
                     top.linkTo(parent.top, 72.dp)
-                    start.linkTo(mainContentGuidelineStart)
+                    start.linkTo(favRef.end)
                     end.linkTo(mainContentGuidelineEnd)
                     width = Dimension.fillToConstraints
                 }
@@ -201,7 +214,8 @@ private fun Content(
             ConstraintLayout(
                 modifier = Modifier.constrainAs(typesRef) {
                     top.linkTo(nameRef.bottom, 16.dp)
-                    centerHorizontallyTo(nameRef)
+                    start.linkTo(mainContentGuidelineStart)
+                    end.linkTo(mainContentGuidelineEnd)
                     width = Dimension.fillToConstraints
                 }
             ) {
@@ -233,7 +247,7 @@ private fun Content(
             ConstraintLayout(
                 modifier = Modifier.constrainAs(aboutRef) {
                     top.linkTo(typesRef.bottom, 16.dp)
-                    centerHorizontallyTo(nameRef)
+                    centerHorizontallyTo(typesRef)
                     width = Dimension.fillToConstraints
                 }
             ) {

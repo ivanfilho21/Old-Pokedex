@@ -50,7 +50,7 @@ val previewList = listOf(
     "wartortle",
     "blastoise"
 ).mapIndexed { i, it ->
-    PokemonEntity(uuid = UUID.randomUUID(), id =i + 1, name = it)
+    PokemonEntity(uuid = UUID.randomUUID(), id = i + 1, favorite = i == 8, name = it)
 }
 
 @Preview
@@ -62,6 +62,7 @@ private fun Preview() {
                 updatePokemonList(previewList)
             },
             onPokemonClick = {},
+            onFavoriteClick = { _, _ -> },
             onTryAgainClick = {}
         )
     }
@@ -79,6 +80,7 @@ private fun PreviewFiltered() {
                 updateFilter()
             },
             onPokemonClick = {},
+            onFavoriteClick = { _, _ -> },
             onTryAgainClick = {}
         )
     }
@@ -88,6 +90,7 @@ private fun PreviewFiltered() {
 fun HomeScreenContent(
     viewModel: HomeLayoutViewModel,
     onPokemonClick: (Int) -> Unit,
+    onFavoriteClick: (Int, Boolean) -> Unit,
     onTryAgainClick: () -> Unit
 ) {
     MainLayout(
@@ -97,7 +100,8 @@ fun HomeScreenContent(
     ) {
         Content(
             viewModel = viewModel,
-            onPokemonClick = onPokemonClick
+            onPokemonClick = onPokemonClick,
+            onFavoriteClick = onFavoriteClick
         )
     }
 }
@@ -187,7 +191,8 @@ private fun getSortIcon(sortMode: SortMode) = painterResource(
 @Composable
 private fun Content(
     viewModel: HomeLayoutViewModel,
-    onPokemonClick: (Int) -> Unit
+    onPokemonClick: (Int) -> Unit,
+    onFavoriteClick: (Int, Boolean) -> Unit
 ) {
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (searchBarRef, listRef) = createRefs()
@@ -231,13 +236,18 @@ private fun Content(
         ) {
             items(items = viewModel.pokemonList) { item ->
                 ListItem(
-                    headlineContent = {
-                        Text(text = item.name?.formatPokemonName().orEmpty())
-                    },
                     leadingContent = {
                         Text(
                             text = "${item.id}"
                         )
+                    },
+                    headlineContent = {
+                        Text(
+                            text = item.name?.formatPokemonName().orEmpty()
+                        )
+                    },
+                    trailingContent = {
+                        ButtonFavoritePokemon(pokemon = item, onClick = onFavoriteClick)
                     },
                     colors = ListItemDefaults.colors(containerColor = backgroundColor),
                     modifier = Modifier.clickable(

@@ -23,4 +23,11 @@ class HomeViewModel @Inject constructor(
             _pokemonListSF.value = useCase.listAll()
         }
     }
+
+    fun favoritePokemon(id: Int, favorite: Boolean) {
+        viewModelScope.launch {
+            useCase.favoritePokemon(id, favorite)
+            _pokemonListSF.value = useCase.listAll()
+        }
+    }
 }
