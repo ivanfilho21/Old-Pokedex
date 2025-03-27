@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Old Pokédex</string>
+    <string name="height">Altura</string>
+    <string name="weight">Peso</string>
+    <string name="base_stats">Estatísticas base</string>
+    <string name="attack">Ataque</string>
+    <string name="defense">Defesa</string>
+    <string name="speed">Velocidade</string>
+    <string name="sp_atk">Atq Sp.</string>
+    <string name="sp_def">Def Sp.</string>
+    <string name="locations">Localização</string>
+    <string name="title_locations_screen_poke_name_value">Onde encontrar %s nos jogos</string>
+    <string name="and">e</string>
+    <string name="cry">Som</string>
+    <string name="see_locations">Ver localização</string>
+    <string name="pokemon_name">Nome do Pokémon</string>
+    <string name="ordering_by">Ordenando por</string>
+    <string name="number">Número</string>
+    <string name="name">Nome</string>
+    <string name="favorite">Favorito</string>
+</resources>

@@ -22,6 +22,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import br.iwan.oldpokedex.R
 import br.iwan.oldpokedex.data.model.UiResponse
 import br.iwan.oldpokedex.ui.content.HomeScreenContent
 import br.iwan.oldpokedex.ui.content.PokemonDetailsScreenContent
@@ -41,6 +42,7 @@ import br.iwan.oldpokedex.ui.view_model.HomeViewModel
 import br.iwan.oldpokedex.ui.view_model.LocationsLayoutViewModel
 import br.iwan.oldpokedex.ui.view_model.LocationsViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -109,7 +111,7 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
                     getPokemonLocations()
 
                     supportActionBar?.run {
-                        title = "Locations"
+                        title = getString(R.string.locations)
                     }
                 }
 
@@ -278,7 +280,13 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
                             navController.navigate(PokemonLocationsScreen(id = pokemon))
                         },
                         playCryClick = detailsVM::playPokemonCry,
-                        onFavoriteClick = homeVM::favoritePokemon,
+                        onFavoriteClick = { id, favorite ->
+                            lifecycleScope.launch {
+                                homeVM.favoritePokemon(id, favorite)
+                                delay(100L)
+                                detailsVM.getDetails(id)
+                            }
+                        },
                         onTryAgainClick = ::getPokemonDetails
                     )
                 }

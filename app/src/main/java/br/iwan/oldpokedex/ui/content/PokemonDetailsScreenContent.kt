@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
@@ -43,6 +44,7 @@ import androidx.constraintlayout.compose.Visibility
 import androidx.constraintlayout.compose.atLeast
 import androidx.constraintlayout.compose.atMost
 import androidx.lifecycle.viewmodel.compose.viewModel
+import br.iwan.oldpokedex.R
 import br.iwan.oldpokedex.data.local.entity.PokemonEntity
 import br.iwan.oldpokedex.data.local.entity.Stat
 import br.iwan.oldpokedex.ui.helper.ColorHelper
@@ -58,31 +60,33 @@ import coil.request.ImageRequest
 import kotlinx.coroutines.delay
 import java.util.UUID
 
+private val previewPokeData = PokemonEntity(
+    UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+    0,
+    false,
+    "Pokémon name",
+    LoremIpsum(6).values.joinToString(" "),
+    "water",
+    "dragon",
+    7,
+    69,
+    listOf(
+        Stat("hp", 90),
+        Stat("attack", 25),
+        Stat("defense", 30),
+        Stat("speed", 63),
+        Stat("special-attack", 45),
+        Stat("special-defense", 45),
+    )
+)
+
 @Preview
 @Composable
 private fun Preview() {
     DefaultPreview {
         PokemonDetailsScreenContent(
             viewModel = viewModel<DetailsLayoutViewModel>().apply {
-                pokemonData = PokemonEntity(
-                    UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
-                    0,
-                    false,
-                    "Pokémon name",
-                    LoremIpsum(6).values.joinToString(" "),
-                    "water",
-                    "dragon",
-                    7,
-                    69,
-                    listOf(
-                        Stat("hp", 90),
-                        Stat("attack", 25),
-                        Stat("defense", 30),
-                        Stat("speed", 63),
-                        Stat("special-attack", 45),
-                        Stat("special-defense", 45),
-                    )
-                )
+                pokemonData = previewPokeData
             },
             seeLocationsClick = {},
             playCryClick = {},
@@ -152,7 +156,7 @@ private fun Content(
             val (favRef, cryRef, nameRef, descRef, typesRef, aboutRef, statsRef) = createRefs()
             val mainContentGuidelineStart = createGuidelineFromStart(16.dp)
             val mainContentGuidelineEnd = createGuidelineFromEnd(16.dp)
-            
+
             var cryBtnEnabled by remember {
                 mutableStateOf(true)
             }
@@ -184,7 +188,7 @@ private fun Content(
                 )
 
                 Text(
-                    text = "Cry",
+                    text = stringResource(R.string.cry),
                     modifier = Modifier.padding(end = 4.dp)
                 )
             }
@@ -255,7 +259,7 @@ private fun Content(
 
                 InfoLayout(
                     info = viewModel.calculateUnits(pokemonData?.height ?: 0) + " m",
-                    label = "Height",
+                    label = stringResource(R.string.height),
                     modifier = Modifier.constrainAs(heightRef) {
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
@@ -273,7 +277,7 @@ private fun Content(
 
                 InfoLayout(
                     info = viewModel.calculateUnits(pokemonData?.weight ?: 0) + " kg",
-                    label = "Weight",
+                    label = stringResource(R.string.weight),
                     modifier = Modifier.constrainAs(weightRef) {
                         top.linkTo(heightRef.top)
                         start.linkTo(heightRef.end, 2.dp)
@@ -395,7 +399,7 @@ private fun Content(
                 width = Dimension.fillToConstraints
             }
         ) {
-            Text(text = "See locations")
+            Text(text = stringResource(R.string.see_locations))
         }
     }
 }
@@ -454,7 +458,7 @@ private fun StatsLayout(stats: List<Stat>?, mainColor: Color, modifier: Modifier
         val (titleRef, listRef) = createRefs()
 
         Text(
-            text = "Base stats",
+            text = stringResource(R.string.base_stats),
             style = AppTypography.titleMedium,
             textAlign = TextAlign.Center,
             modifier = Modifier.constrainAs(titleRef) {
@@ -475,12 +479,21 @@ private fun StatsLayout(stats: List<Stat>?, mainColor: Color, modifier: Modifier
                 }
         ) {
             items(items = stats.orEmpty()) {
-                val name = when (it.name) {
-                    "special-attack" -> "sp.-atk"
-                    "special-defense" -> "sp.-def"
-                    else -> it.name
+                val nameStringRes = when (it.name) {
+                    "attack" -> R.string.attack
+                    "defense" -> R.string.defense
+                    "speed" -> R.string.speed
+                    "special-attack" -> R.string.sp_atk
+                    "special-defense" -> R.string.sp_def
+                    else -> 0
                 }
-                StatItem(name.orEmpty(), it.value, mainColor, Modifier.fillMaxWidth())
+
+                StatItem(
+                    if (nameStringRes == 0) it.name.orEmpty() else stringResource(nameStringRes),
+                    it.value,
+                    mainColor,
+                    Modifier.fillMaxWidth()
+                )
             }
         }
     }

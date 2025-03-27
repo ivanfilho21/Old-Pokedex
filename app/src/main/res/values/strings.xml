@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">Old Pokédex</string>
+    <string name="pokemon_name">Pokémon name</string>
+    <string name="height">Height</string>
+    <string name="weight">Weight</string>
+    <string name="base_stats">Base stats</string>
+    <string name="attack">Attack</string>
+    <string name="defense">Defense</string>
+    <string name="speed">Speed</string>
+    <string name="sp_atk">Sp. Atk</string>
+    <string name="sp_def">Sp. Def</string>
+    <string name="see_locations">See locations</string>
+    <string name="locations">Locations</string>
+    <string name="title_locations_screen_poke_name_value">Encounters locations in games for %s</string>
+    <string name="and">and</string>
+    <string name="cry">Cry</string>
+    <string name="ordering_by">Ordering by</string>
+    <string name="number">Number</string>
+    <string name="name">Name</string>
+    <string name="favorite">Favorite</string>
 </resources>

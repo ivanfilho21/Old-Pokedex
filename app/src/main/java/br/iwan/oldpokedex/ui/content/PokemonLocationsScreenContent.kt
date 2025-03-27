@@ -11,12 +11,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
+import br.iwan.oldpokedex.R
 import br.iwan.oldpokedex.data.local.entity.PokemonLocationEntity
 import br.iwan.oldpokedex.data.model.EncounterInGame
 import br.iwan.oldpokedex.data.model.Location
@@ -138,7 +141,10 @@ private fun Content(viewModel: LocationsLayoutViewModel) {
         val (titleRef, listRef) = createRefs()
 
         Text(
-            text = "Encounters locations in games for ${viewModel.pokemonName?.formatPokemonName()}",
+            text = stringResource(
+                R.string.title_locations_screen_poke_name_value,
+                viewModel.pokemonName?.formatPokemonName().orEmpty()
+            ),
             style = AppTypography.titleLarge,
             modifier = Modifier.constrainAs(titleRef) {
                 top.linkTo(parent.top, 16.dp)
@@ -171,13 +177,16 @@ private fun Content(viewModel: LocationsLayoutViewModel) {
 
                 viewModel.mergeEncountersInAreaByVersion(region).forEach { (encounter, versions) ->
                     Text(
-                        text = versions.joinWithComma { it.capitalizeWords() },
+                        text = versions.joinWithComma(LocalContext.current) {
+                            it.capitalizeWords()
+                        },
                         style = AppTypography.titleSmall,
                         modifier = Modifier.fillParentMaxWidth()
                     )
 
                     Text(
-                        text = " • " + encounter.method?.capitalizeWords().orEmpty() + ": " + PokemonHelper.getEncounterText(encounter),
+                        text = " • " + encounter.method?.capitalizeWords()
+                            .orEmpty() + ": " + PokemonHelper.getEncounterText(encounter),
                         style = AppTypography.bodyMedium,
                         modifier = Modifier.fillParentMaxWidth()
                     )
@@ -210,7 +219,7 @@ private fun EmptyLocationContent() {
                     end = parent.end,
                     endMargin = 24.dp
                 )
-                
+
                 Dimension.fillToConstraints.let {
                     width = it
                     height = it

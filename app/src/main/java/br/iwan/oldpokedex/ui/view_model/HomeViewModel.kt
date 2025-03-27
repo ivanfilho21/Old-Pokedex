@@ -6,6 +6,7 @@ import br.iwan.oldpokedex.data.local.entity.PokemonEntity
 import br.iwan.oldpokedex.data.model.UiResponse
 import br.iwan.oldpokedex.data.use_case.PokemonUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -27,6 +28,7 @@ class HomeViewModel @Inject constructor(
     fun favoritePokemon(id: Int, favorite: Boolean) {
         viewModelScope.launch {
             useCase.favoritePokemon(id, favorite)
+            delay(100L)
             _pokemonListSF.value = useCase.listAll()
         }
     }

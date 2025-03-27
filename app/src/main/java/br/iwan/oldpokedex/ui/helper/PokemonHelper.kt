@@ -1,5 +1,7 @@
 package br.iwan.oldpokedex.ui.helper
 
+import android.content.Context
+import br.iwan.oldpokedex.R
 import br.iwan.oldpokedex.data.model.EncounterInGame
 
 object PokemonHelper {
@@ -31,14 +33,14 @@ object PokemonHelper {
         ) + "."
     }
 
-    fun List<String>.joinWithComma(transform: ((String) -> String)): String {
+    fun List<String>.joinWithComma(context: Context, transform: ((String) -> String)): String {
         val sb = StringBuilder()
 
         this.forEachIndexed { i, text ->
             sb.append(transform(text)).append(
                 when (i) {
                     size - 1 -> ""
-                    size - 2 -> " and "
+                    size - 2 -> context.getString(R.string.and).let { " $it " }
                     else -> ", "
                 }
             )

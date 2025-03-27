@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -150,7 +151,7 @@ private fun SearchBarContent(
                 expanded = false,
                 onExpandedChange = { _ -> },
                 placeholder = {
-                    Text("Pokémon name")
+                    Text(text = stringResource(R.string.pokemon_name))
                 },
                 leadingIcon = {
                     Icon(
@@ -161,7 +162,7 @@ private fun SearchBarContent(
                 trailingIcon = {
                     Icon(
                         painter = getSortIcon(viewModel.currentSortingMode),
-                        contentDescription = "Ordering by favorite",
+                        contentDescription = getSortDescription(viewModel.currentSortingMode),
                         modifier = Modifier.clickable(
                             enabled = orderBtnEnabled,
                             onClick = {
@@ -187,6 +188,16 @@ private fun getSortIcon(sortMode: SortMode) = painterResource(
         SortMode.FAVORITE -> R.drawable.baseline_favorite_24
     }
 )
+
+@Composable
+private fun getSortDescription(sortMode: SortMode) =
+    stringResource(R.string.ordering_by) + " " + stringResource(
+        when (sortMode) {
+            SortMode.NUMBER -> R.string.number
+            SortMode.NAME -> R.string.name
+            SortMode.FAVORITE -> R.string.favorite
+        }
+    )
 
 @Composable
 private fun Content(
