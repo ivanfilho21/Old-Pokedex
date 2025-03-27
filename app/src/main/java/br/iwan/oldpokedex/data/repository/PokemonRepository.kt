@@ -116,7 +116,9 @@ class PokemonRepository @Inject constructor(
                             it.language?.name?.equals("en", true) == true &&
                                     it.version?.name?.equals("yellow", true) == true
                         }?.firstNotNullOfOrNull {
-                            it.text?.trim()?.replace("\n", " ")
+                            it.text?.trim()
+                                ?.replace("\n", " ")
+                                ?.replace("\u00AD ", "")
                         }
 
                         pokemon.apply {
